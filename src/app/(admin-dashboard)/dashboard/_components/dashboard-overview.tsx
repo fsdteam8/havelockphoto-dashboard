@@ -1,5 +1,6 @@
 import Image from "next/image";
 import React from "react";
+import { GoDotFill } from "react-icons/go";
 
 const DashOverview = () => {
   const overviewData = [
@@ -8,12 +9,14 @@ const DashOverview = () => {
       name: "Own Revenue",
       value: "£132,570",
       image: "/assets/images/revenue.png",
+      color: "#525773",
     },
     {
       id: 2,
       name: "Total Events",
       value: "20.00",
       image: "/assets/images/events.png",
+      color: "#008000",
     },
   ];
   return (
@@ -35,7 +38,9 @@ const DashOverview = () => {
               <h3 className="text-xl font-bold text-[#131313] leading-[120%] font-manrope">
                 {item?.name}
               </h3>
-              <p className="text-lg font-medium leading-[120%] text-[#424242] font-manrope pt-2">
+              <p className="text-lg font-medium leading-[120%] text-[#424242] font-manrope pt-2 flex items-center gap-1">
+                <GoDotFill className="w-4 h-4" style={{ color: item.color }} />
+
                 {item?.value}
               </p>
             </div>
