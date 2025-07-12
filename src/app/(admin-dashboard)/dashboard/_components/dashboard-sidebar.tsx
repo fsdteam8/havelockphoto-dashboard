@@ -9,7 +9,7 @@ import { LogOut } from "lucide-react";
 const DashboardSidebar = () => {
     const pathName = usePathname();
   return (
-    <aside className="w-[350px] h-screen bg-[#FAFAFA] border-r border-[#D9D9D9] py-6 px-4 -mt-[100px]">
+    <aside className="w-[350px] h-screen sticky top-0 z-50 bg-[#FAFAFA] border-r border-[#D9D9D9] py-6 px-4 -mt-[100px]">
       <div className="flex flex-col items-center ">
         {/* Logo */}
         <Image
