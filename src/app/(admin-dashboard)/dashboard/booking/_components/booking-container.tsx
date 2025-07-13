@@ -114,9 +114,9 @@ const BookingContainer = () => {
                   <button className="py-[5px] px-[15px] bg-[#008000] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope">
                     Completed
                   </button>
-                  <button className="py-[5px] px-[12px] bg-[#CBA0E3] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope">
+                  {/* <button className="py-[5px] px-[12px] bg-[#CBA0E3] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope">
                     Scheduling
-                  </button>
+                  </button> */}
                 </td>
               </tr>
             ))}

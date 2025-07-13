@@ -2,7 +2,7 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-const EditVideoHeader = () => {
+const EditVideoHeader = ({ videoId }: { videoId: string }) => {
   return (
     <div>
       <h1 className="text-2xl font-bold text-[#131313] leading-[120%] font-manrope">
@@ -30,6 +30,13 @@ const EditVideoHeader = () => {
         </span>
         <p className="text-base font-medium leading-[120%] text-[#929292] font-manrope">
           Edit Video
+        </p>
+        <span>
+          {" "}
+          <ChevronRight className="text-[#929292] w-[18px] h-[18px]" />
+        </span>
+        <p className="text-base font-medium leading-[120%] text-[#929292] font-manrope">
+          {videoId}
         </p>
       </div>
     </div>

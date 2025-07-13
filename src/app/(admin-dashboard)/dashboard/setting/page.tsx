@@ -1,11 +1,14 @@
-import React from 'react'
+import React from "react";
+import SettingHeader from "./_components/setting-header";
+import SettingContainerForm from "./_components/setting-container-form";
 
 const Setting = () => {
   return (
     <div>
-      setting page
+      <SettingHeader />
+      <SettingContainerForm />
     </div>
-  )
-}
+  );
+};
 
-export default Setting
+export default Setting;

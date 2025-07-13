@@ -16,43 +16,43 @@ const VideosContainer = () => {
   const bookingData: bookingDataType[] = [
     {
       id: 1,
-      img: "/assets/images/event1.jpg",
+      img: "/assets/images/video1.jpg",
       name: "Marriage anniversary",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 2,
-      img: "/assets/images/event2.jpg",
+      img: "/assets/images/video2.jpg",
       name: "Birthday",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 3,
-      img: "/assets/images/event1.jpg",
+      img: "/assets/images/video1.jpg",
       name: "Marriage anniversary",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 4,
-      img: "/assets/images/event2.jpg",
+      img: "/assets/images/video2.jpg",
       name: "Birthday",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 5,
-      img: "/assets/images/event1.jpg",
+      img: "/assets/images/video1.jpg",
       name: "Marriage anniversary",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 6,
-      img: "/assets/images/event2.jpg",
+      img: "/assets/images/video2.jpg",
       name: "Birthday",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 7,
-      img: "/assets/images/event1.jpg",
+      img: "/assets/images/video1.jpg",
       name: "Marriage anniversary",
       date: "04/21/2025 03:18pm",
     },
@@ -103,7 +103,7 @@ const VideosContainer = () => {
                 </td>
                 <td className="w-[130px] text-right py-[10px] pr-[50px]">
                   <div className="flex items-center justify-end gap-4">
-                    <Link href="/dashboard/videos/edit-video">
+                    <Link href={`/dashboard/videos/edit-video/${item.id}`}>
                       <button>
                         <SquarePen className="w-5 h-5" />
                       </button>

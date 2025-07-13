@@ -108,12 +108,12 @@ const MyEventsContainer = () => {
                 <td className="w-[400px] flex items-center gap-[10px] pl-[50px] py-[10px]">
                   <div className="max-w-[100px] ">
                     <Image
-                    src={item.img}
-                    alt={item.name}
-                    width={100}
-                    height={60}
-                    className="w-[100px] h-[60px] rounded-[8px] object-cover"
-                  />
+                      src={item.img}
+                      alt={item.name}
+                      width={100}
+                      height={60}
+                      className="w-[100px] h-[60px] rounded-[8px] object-cover"
+                    />
                   </div>
                   <h4 className="w-[290px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
                     {item.name}
@@ -130,7 +130,7 @@ const MyEventsContainer = () => {
                 </td>
                 <td className="w-[130px] text-right py-[10px] pr-[50px]">
                   <div className="flex items-center justify-end gap-4">
-                    <Link href="/dashboard/my-events/edit-event">
+                    <Link href={`/dashboard/my-events/edit-event/${item.id}`}>
                       <button>
                         <SquarePen className="w-5 h-5" />
                       </button>
