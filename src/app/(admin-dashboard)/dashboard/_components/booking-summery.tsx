@@ -22,7 +22,7 @@ import {
 export const description = "An area chart with a legend";
 
 const chartData = [
-  { month: "January", ThisYear: 186, LastYear: 80 },
+  { month: "January", ThisYear: 286, LastYear: 180 },
   { month: "February", ThisYear: 305, LastYear: 200 },
   { month: "March", ThisYear: 237, LastYear: 120 },
   { month: "April", ThisYear: 73, LastYear: 190 },
@@ -79,7 +79,7 @@ export function BookingSummery() {
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent indicator="line" />}
+              content={<ChartTooltipContent indicator="line" className="bg-white" />}
             />
             
             <Area

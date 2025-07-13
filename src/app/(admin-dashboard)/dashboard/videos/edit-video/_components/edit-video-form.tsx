@@ -24,7 +24,7 @@ const formSchema = z.object({
   video: z.any().optional(),
 });
 
-const EditVideoForm = () => {
+const EditVideoForm = ({ videoId }: { videoId: string }) => {
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -35,6 +35,8 @@ const EditVideoForm = () => {
       video: undefined,
     },
   });
+
+  console.log(videoId);
 
   const handleVideoChange = (file: File) => {
     if (file && file.type.startsWith("video/")) {

@@ -55,7 +55,7 @@ const formSchema = z.object({
   image: z.any().optional(),
 });
 
-const EditEventForm = () => {
+const EditEventForm = ({ eventId }: { eventId: string }) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -71,6 +71,7 @@ const EditEventForm = () => {
       image: undefined,
     },
   });
+  console.log(eventId);
 
   const handleImageChange = (file: File) => {
     if (file) {
