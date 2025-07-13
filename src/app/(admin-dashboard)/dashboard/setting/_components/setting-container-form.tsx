@@ -75,7 +75,7 @@ const SettingContainerForm = () => {
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
-                        className="w-full h-[50px] border border-[#929292] rounded-[4px] py-[14px] px-[24px] text-base font-semibold font-manrope leading-[120%]"
+                        className="w-full h-[50px] border border-[#929292] rounded-[4px] py-[14px] px-[24px] text-lg font-semibold font-manrope leading-[120%]"
                         placeholder="***********"
                         {...field}
                       />
@@ -110,7 +110,7 @@ const SettingContainerForm = () => {
                     <div className="relative">
                       <Input
                         type={showNewPassword ? "text" : "password"}
-                        className="w-full h-[50px] border border-[#929292] rounded-[4px] py-[14px] px-[24px] text-base font-semibold font-manrope leading-[120%]"
+                        className="w-full h-[50px] border border-[#929292] rounded-[4px] py-[14px] px-[24px] text-lg font-semibold font-manrope leading-[120%]"
                         placeholder="***********"
                         {...field}
                       />
@@ -145,7 +145,7 @@ const SettingContainerForm = () => {
                     <div className="relative">
                       <Input
                         type={showConfirmPassword ? "text" : "password"}
-                        className="w-full h-[50px] border border-[#929292] rounded-[4px] py-[14px] px-[24px] text-base font-semibold font-manrope leading-[120%]"
+                        className="w-full h-[50px] border border-[#929292] rounded-[4px] py-[14px] px-[24px] text-lg font-semibold font-manrope leading-[120%]"
                         placeholder="***********"
                         {...field}
                       />
