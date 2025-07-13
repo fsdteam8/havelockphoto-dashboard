@@ -5,71 +5,55 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 
-const MyEventsContainer = () => {
+const VideosContainer = () => {
   const [currentPage, setCurrentPage] = useState(1);
   interface bookingDataType {
     id: number;
     img: string;
     name: string;
-    price: string;
-    type: string;
     date: string;
   }
   const bookingData: bookingDataType[] = [
     {
       id: 1,
       img: "/assets/images/event1.jpg",
-      name: "LinkedIn Profile Picture",
-      price: "$150.00",
-      type: "In Studio",
+      name: "Marriage anniversary",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 2,
       img: "/assets/images/event2.jpg",
-      name: "Branding Photography",
-      price: "$399.00",
-      type: "In Studio",
+      name: "Birthday",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 3,
       img: "/assets/images/event1.jpg",
-      name: "LinkedIn Profile Picture",
-      price: "$200.00",
-      type: "In Studio",
+      name: "Marriage anniversary",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 4,
       img: "/assets/images/event2.jpg",
-      name: "Branding Photography",
-      price: "$200.00",
-      type: "In Studio",
+      name: "Birthday",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 5,
       img: "/assets/images/event1.jpg",
-      name: "Branding Photography",
-      price: "$200.00",
-      type: "In Studio",
+      name: "Marriage anniversary",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 6,
       img: "/assets/images/event2.jpg",
-      name: "Branding Photography",
-      price: "$200.00",
-      type: "In Studio",
+      name: "Birthday",
       date: "04/21/2025 03:18pm",
     },
     {
       id: 7,
       img: "/assets/images/event1.jpg",
-      name: "Branding Photography",
-      price: "$200.00",
-      type: "In Studio",
+      name: "Marriage anniversary",
       date: "04/21/2025 03:18pm",
     },
   ];
@@ -81,13 +65,7 @@ const MyEventsContainer = () => {
           <thead className="">
             <tr className=" border-x border-t border-[#B6B6B6] flex items-center justify-between gap-[135px]">
               <th className="w-[400px] text-base font-bold text-[#131313] leading-[120%] font-manrope text-left py-[15px] pl-[50px]">
-                Event Name
-              </th>
-              <th className="w-[100px] text-base font-bold text-[#131313] leading-[120%] font-manrope text-left py-[15px]">
-                Price
-              </th>
-              <th className="w-[150px] text-base font-bold text-[#131313] leading-[120%] font-manrope text-left py-[15px]">
-                Type
+                Videos Name
               </th>
               <th className="w-[150px] text-base font-bold text-[#131313] leading-[120%] font-manrope text-left py-[15px]">
                 Date
@@ -106,31 +84,26 @@ const MyEventsContainer = () => {
                 } border-t border-x border-[#B6B6B6] flex items-center justify-between gap-[135px]`}
               >
                 <td className="w-[400px] flex items-center gap-[10px] pl-[50px] py-[10px]">
-                  <div className="max-w-[100px] ">
+                  <div className="max-w-[100px]">
                     <Image
-                    src={item.img}
-                    alt={item.name}
-                    width={100}
-                    height={60}
-                    className="w-[100px] h-[60px] rounded-[8px] object-cover"
-                  />
+                      src={item.img}
+                      alt={item.name}
+                      width={100}
+                      height={60}
+                      className="w-[100px] h-[60px] rounded-[8px] object-cover"
+                    />
                   </div>
+
                   <h4 className="w-[290px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
                     {item.name}
                   </h4>
-                </td>
-                <td className="w-[100px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
-                  {item.price}
-                </td>
-                <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
-                  {item.type}
                 </td>
                 <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
                   {item.date}
                 </td>
                 <td className="w-[130px] text-right py-[10px] pr-[50px]">
                   <div className="flex items-center justify-end gap-4">
-                    <Link href="/dashboard/my-events/edit-event">
+                    <Link href="/dashboard/videos/edit-video">
                       <button>
                         <SquarePen className="w-5 h-5" />
                       </button>
@@ -164,4 +137,4 @@ const MyEventsContainer = () => {
   );
 };
 
-export default MyEventsContainer;
+export default VideosContainer;

@@ -206,8 +206,8 @@ const AddEventForm = () => {
                         Date
                       </FormLabel>
                       <Popover>
-                        <PopoverTrigger asChild className="w-full ">
-                          <FormControl className="w-full h-[50px] border border-[#B6B6B6] rounded-[4px]">
+                        <PopoverTrigger asChild className="">
+                          <FormControl className="h-[50px] border border-[#B6B6B6] rounded-[4px]">
                             <Button
                               variant={"outline"}
                               className={cn(
@@ -295,7 +295,7 @@ const AddEventForm = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-base font-semibold font-manrope tracking-[0%] leading-[120%] text-black">
-                        Logn Description
+                        Long Description
                       </FormLabel>
                       <FormControl>
                         <RichTextEditor

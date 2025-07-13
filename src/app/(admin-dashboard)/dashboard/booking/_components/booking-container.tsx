@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import HavelockPhotoPagination from "@/components/ui/havelockphoto-pagination";
 import Image from "next/image";
 import React, { useState } from "react";
@@ -16,43 +16,43 @@ const BookingContainer = () => {
   const bookingData: bookingDataType[] = [
     {
       id: 1,
-      img : "/assets/images/event1.jpg",
-      name : "LinkedIn Profile Picture",
-      price : "$200.00",
-      address : "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
-      date : "04/21/2025 03:18pm"
+      img: "/assets/images/event1.jpg",
+      name: "LinkedIn Profile Picture",
+      price: "$200.00",
+      address: "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
+      date: "04/21/2025 03:18pm",
     },
     {
       id: 2,
-      img : "/assets/images/event2.jpg",
-      name : "Branding Photography",
-      price : "$200.00",
-      address : "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
-      date : "04/21/2025 03:18pm"
+      img: "/assets/images/event2.jpg",
+      name: "Branding Photography",
+      price: "$200.00",
+      address: "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
+      date: "04/21/2025 03:18pm",
     },
     {
       id: 3,
-      img : "/assets/images/event1.jpg",
-      name : "LinkedIn Profile Picture",
-      price : "$200.00",
-      address : "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
-      date : "04/21/2025 03:18pm"
+      img: "/assets/images/event1.jpg",
+      name: "LinkedIn Profile Picture",
+      price: "$200.00",
+      address: "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
+      date: "04/21/2025 03:18pm",
     },
     {
       id: 4,
-      img : "/assets/images/event2.jpg",
-      name : "Branding Photography",
-      price : "$200.00",
-      address : "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
-      date : "04/21/2025 03:18pm"
+      img: "/assets/images/event2.jpg",
+      name: "Branding Photography",
+      price: "$200.00",
+      address: "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
+      date: "04/21/2025 03:18pm",
     },
     {
       id: 5,
-      img : "/assets/images/event1.jpg",
-      name : "Branding Photography",
-      price : "$200.00",
-      address : "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
-      date : "04/21/2025 03:18pm"
+      img: "/assets/images/event1.jpg",
+      name: "Branding Photography",
+      price: "$200.00",
+      address: "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
+      date: "04/21/2025 03:18pm",
     },
   ];
 
@@ -81,10 +81,25 @@ const BookingContainer = () => {
           </thead>
           <tbody>
             {bookingData.map((item) => (
-              <tr key={item.id} className={`${item.id === 5 ? "border-b" : "border-b-0"} border-t border-x border-[#B6B6B6] flex items-center justify-between gap-[155px]`}>
+              <tr
+                key={item.id}
+                className={`${
+                  item.id === 5 ? "border-b" : "border-b-0"
+                } border-t border-x border-[#B6B6B6] flex items-center justify-between gap-[155px]`}
+              >
                 <td className="w-[300px] flex items-center gap-[10px] pl-[50px] py-[20px]">
-                  <Image src={item.img} alt={item.name} width={100} height={60} className="w-[100px] h-[60px] rounded-[8px] object-cover"/>
-                  <h4 className="w-[190px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">{item.name}</h4>
+                  <div className="max-w-[100px]">
+                    <Image
+                      src={item.img}
+                      alt={item.name}
+                      width={100}
+                      height={60}
+                      className="w-[100px] h-[60px] rounded-[8px] object-cover"
+                    />
+                  </div>
+                  <h4 className="w-[190px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
+                    {item.name}
+                  </h4>
                 </td>
                 <td className="w-[100px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
                   {item.price}
@@ -96,8 +111,12 @@ const BookingContainer = () => {
                   {item.date}
                 </td>
                 <td className="w-[170px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-center pr-[50px] py-[20px] flex flex-col gap-2">
-                  <button className="py-[5px] px-[15px] bg-[#008000] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope">Completed</button>
-                  <button className="py-[5px] px-[12px] bg-[#CBA0E3] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope">Scheduling</button>
+                  <button className="py-[5px] px-[15px] bg-[#008000] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope">
+                    Completed
+                  </button>
+                  <button className="py-[5px] px-[12px] bg-[#CBA0E3] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope">
+                    Scheduling
+                  </button>
                 </td>
               </tr>
             ))}
@@ -105,15 +124,17 @@ const BookingContainer = () => {
         </table>
       </div>
       <div className="bg-white flex items-center justify-between py-[10px] px-[50px]">
-        <p className="text-sm font-medium leading-[120%] font-manrope text-[#707070]">Showing 1 to 5 of 12 results</p>
+        <p className="text-sm font-medium leading-[120%] font-manrope text-[#707070]">
+          Showing 1 to 5 of 12 results
+        </p>
 
-      <div>
-        <HavelockPhotoPagination
-        totalPages={5}
-        currentPage={currentPage}
-        onPageChange={(page) => setCurrentPage(page)}
-      />
-      </div>
+        <div>
+          <HavelockPhotoPagination
+            totalPages={5}
+            currentPage={currentPage}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
+        </div>
       </div>
     </div>
   );
