@@ -46,6 +46,14 @@ const BookingContainer = () => {
       address : "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
       date : "04/21/2025 03:18pm"
     },
+    {
+      id: 5,
+      img : "/assets/images/event1.jpg",
+      name : "Branding Photography",
+      price : "$200.00",
+      address : "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
+      date : "04/21/2025 03:18pm"
+    },
   ];
 
   return (
@@ -73,7 +81,7 @@ const BookingContainer = () => {
           </thead>
           <tbody>
             {bookingData.map((item) => (
-              <tr key={item.id} className={`${item.id === 4 ? "border-b" : "border-b-0"} border-t border-x border-[#B6B6B6] flex items-center justify-between gap-[155px]`}>
+              <tr key={item.id} className={`${item.id === 5 ? "border-b" : "border-b-0"} border-t border-x border-[#B6B6B6] flex items-center justify-between gap-[155px]`}>
                 <td className="w-[300px] flex items-center gap-[10px] pl-[50px] py-[20px]">
                   <Image src={item.img} alt={item.name} width={100} height={60} className="w-[100px] h-[60px] rounded-[8px] object-cover"/>
                   <h4 className="w-[190px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">{item.name}</h4>

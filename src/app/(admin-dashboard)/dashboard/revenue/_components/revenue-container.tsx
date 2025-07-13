@@ -46,12 +46,18 @@ const RevenueContainer = () => {
       paymentId: "10006",
       season: 3,
       amount: "$360",
+    },
+     {
+      id: 7,
+      paymentId: "10005",
+      season: 2,
+      amount: "$275",
     }
   ];
 
   return (
     <div>
-      <div className="pt-[70px]">
+      <div className="pt-[32px]">
         <table className="w-full">
           <thead className="">
             <tr className=" border border-[#B6B6B6]">
