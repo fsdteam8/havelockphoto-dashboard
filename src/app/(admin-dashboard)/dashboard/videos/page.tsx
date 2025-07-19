@@ -1,11 +1,14 @@
-import React from 'react'
+import React from "react";
+import VideosHeader from "./_components/videos-header";
+import VideosContainer from "./_components/videos-container";
 
 const Videos = () => {
   return (
     <div>
-      videos
+      <VideosHeader />
+      <VideosContainer />
     </div>
-  )
-}
+  );
+};
 
-export default Videos
+export default Videos;
