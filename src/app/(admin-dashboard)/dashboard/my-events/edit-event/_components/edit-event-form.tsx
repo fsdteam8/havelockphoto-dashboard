@@ -427,4 +427,3 @@ const EditEventForm = ({ eventId }: { eventId: string }) => {
 };
 
 export default EditEventForm;
-
