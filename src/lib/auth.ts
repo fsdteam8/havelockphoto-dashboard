@@ -1,9 +1,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { authApi } from "./auth-api"
+import type { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { authApi } from "./auth-api";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -15,26 +15,28 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          return null;
         }
 
         try {
           const response = await authApi.login({
             email: credentials.email,
             password: credentials.password,
-          })
+          });
 
           if (response) {
+            console.log("responseeeeeeeeeeeeeeeeeeeeeeeeeeee", response);
             return {
-              id: response.user?.id || "1",
+              id: response.data.user?.id || "1",
               email: credentials.email,
-              name: response.user?.name || credentials.email,
-            }
+              name: response.data.user?.name || credentials.email,
+              accessToken: response.data.accessToken || "", // if you use it
+            };
           }
-          return null
+          return null;
         } catch (error) {
-          console.error("Auth error:", error)
-          return null
+          console.error("Auth error:", error);
+          return null;
         }
       },
     }),
@@ -48,17 +50,17 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
+        token.id = user.id;
+        token.accessToken = user.accessToken; // if you use it
       }
-      return token
+      return token;
     },
-   session: async ({ session, token }) => {
-    if (token && session?.user) {
-      session.user.id = token.id as any
-      session.user.accessToken = token.accessToken as any // if you use it
-    }
-    return session
-  }
-
+    session: async ({ session, token }) => {
+      if (token && session?.user) {
+        session.user.id = token.id as any;
+        session.accessToken = token.accessToken as any; // if you use it
+      }
+      return session;
+    },
   },
-}
+};
