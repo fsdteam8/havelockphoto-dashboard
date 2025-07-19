@@ -10,17 +10,17 @@ const DashboardContainer = () => {
   const { data, isLoading, isError, error } = useQuery<BookingSummaryResponse>({
     queryKey: ["dashboard-overview"],
     queryFn: () =>
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/booking/summary?filter=month&year=2025`).then(
-        (res) => res.json()
-      ),
+      fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/booking/summary?filter=month&year=2025`
+      ).then((res) => res.json()),
   });
 
-  console.log(data?.message?.monthWise)
+  console.log(data?.message?.monthWise);
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Error: {error?.message}</div>;
   return (
     <div>
-      <DashOverview data={data?.message}/>
+      <DashOverview data={data?.message} />
       <RevenueStatistics />
       <BookingSummery />
     </div>

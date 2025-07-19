@@ -1,6 +1,4 @@
-
 "use client";
-
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import {
@@ -13,44 +11,51 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useQuery } from "@tanstack/react-query";
 
-export const description = "An area chart with a legend";
-
-const chartData = [
-  { month: "January", ThisYear: 286, LastYear: 180 },
-  { month: "February", ThisYear: 305, LastYear: 200 },
-  { month: "March", ThisYear: 237, LastYear: 120 },
-  { month: "April", ThisYear: 73, LastYear: 190 },
-  { month: "May", ThisYear: 209, LastYear: 130 },
-  { month: "June", ThisYear: 214, LastYear: 140 },
-  { month: "July", ThisYear: 198, LastYear: 150 },
-  { month: "August", ThisYear: 225, LastYear: 160 },
-  { month: "September", ThisYear: 175, LastYear: 135 },
-  { month: "October", ThisYear: 245, LastYear: 170 },
-  { month: "November", ThisYear: 190, LastYear: 110 },
-  { month: "December", ThisYear: 280, LastYear: 200 },
-];
+export const description = "A simple area chart";
 
 const chartConfig = {
-  ThisYear: {
-    label: "This Year",
-    color: "#a384e8",
-  },
-  LastYear: {
-    label: "Last Year",
-    
-    color: "#84c2bb",
+  bookingsCount: {
+    label: "Booking",
+    color: "#E76E50",
   },
 } satisfies ChartConfig;
 
+
+export interface BookingSummaryResponse {
+  status: string;
+  message: {
+    year: number;
+    monthWise: MonthlyBookingSummary[];
+  };
+}
+
+export interface MonthlyBookingSummary {
+  month: string; // e.g., "Jul"
+  key: string; // e.g., "2025-07"
+  revenue: number; // e.g., 1200
+  bookingsCount: number; // e.g., 5
+}
+
 export function BookingSummery() {
+    const { data, isLoading, isError, error } = useQuery<BookingSummaryResponse>({
+    queryKey: ["booking-summery"],
+    queryFn: () =>
+      fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/booking/summary?filter=month&year=2025`
+      ).then((res) => res.json()),
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error: {error?.message}</div>;
+
+  console.log(data?.message);
   return (
-    <Card className="max-h-[425px] mt-[29px] mb-[60px]">
+    <Card className="bg-[#FAFAFA] max-h-[426px] mt-[29px] mb-[60px]">
       <CardHeader>
         <CardTitle className="text-[32px] font-semibold text-[#1C2024] leading-[16px] pb-[6px]">
           Booking Summery
@@ -63,7 +68,7 @@ export function BookingSummery() {
         <ChartContainer config={chartConfig} className="w-full max-h-[285px]">
           <AreaChart
             accessibilityLayer
-            data={chartData}
+            data={data?.message?.monthWise}
             margin={{
               left: 12,
               right: 12,
@@ -81,27 +86,17 @@ export function BookingSummery() {
               cursor={false}
               content={<ChartTooltipContent indicator="line" className="bg-white" />}
             />
-            
             <Area
-              dataKey="ThisYear"
+              dataKey="bookingsCount"
               type="natural"
-              fill="var(--color-ThisYear)"
+              fill="var(--color-bookingsCount)"
               fillOpacity={0.4}
-              stroke="var(--color-ThisYear)"
-              stackId="a"
+              stroke="var(--color-bookingsCount)"
             />
-            <Area
-              dataKey="LastYear"
-              type="natural"
-              fill="var(--color-LastYear)"
-              fillOpacity={0.4}
-              stroke="var(--color-LastYear)"
-              stackId="a"
-            />
-            <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>
         </ChartContainer>
       </CardContent>
+      
     </Card>
   );
 }
