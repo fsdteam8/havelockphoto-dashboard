@@ -55,7 +55,7 @@ export function RevenueStatistics() {
           Revenue Statistics
         </CardTitle>
         <CardDescription className="text-sm text-[#60646C] leading-[120%] font-normal">
-          January - December2024
+          January - December 2025
         </CardDescription>
       </CardHeader>
       <CardContent>

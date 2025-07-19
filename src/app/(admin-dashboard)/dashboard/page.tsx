@@ -1,14 +1,16 @@
 import React from "react";
-import { BookingSummery } from "./_components/booking-summery";
-import DashOverview from "./_components/dashboard-overview";
-import { RevenueStatistics } from "./_components/revenue-statistics";
+import DashboardContainer from "./_components/dashboard-container";
+// import { BookingSummery } from "./_components/booking-summery";
+// import DashOverview from "./_components/dashboard-overview";
+// import { RevenueStatistics } from "./_components/revenue-statistics";
 
 const DashboardOverview = () => {
   return (
     <div>
-      <DashOverview />
+      {/* <DashOverview />
       <RevenueStatistics />
-      <BookingSummery />
+      <BookingSummery /> */}
+      <DashboardContainer />
     </div>
   );
 };

@@ -16,9 +16,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { useState, useRef } from "react";
 import { Video, Upload, X } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  addTitle: z.string().min(2, {
+  title: z.string().min(2, {
     message: "Add Title must be at least 2 characters.",
   }),
   video: z.any().optional(),
@@ -28,10 +31,13 @@ const AddVideoForm = () => {
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const router = useRouter();
+  const token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODcxZjUwZTlkMjFiOTI3YWI4YWY2NTEiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NTI4MTMxMzUsImV4cCI6MTc1MzQxNzkzNX0.8Fa9S3FtjWprAe_TMGeXM2lFOFHeQpIpGHYk6Adoyew";
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      addTitle: "",
+      title: "",
       video: undefined,
     },
   });
@@ -63,8 +69,38 @@ const AddVideoForm = () => {
     setIsDragOver(false);
   };
 
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["add-video"],
+    mutationFn: (formData: FormData) =>
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/video`, {
+        method: "POST",
+        headers: {
+          // "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }).then((res) => res.json()),
+    onSuccess: (data) => {
+      if (!data?.status) {
+        toast.error(data?.message || "Failed to add video");
+        return;
+      }
+
+      toast.success("Video added successfully!");
+      setPreviewVideo(null);
+      form.reset();
+      router.push("/dashboard/videos");
+    },
+  });
+
   function onSubmit(values: z.infer<typeof formSchema>) {
+    const formData = new FormData();
+    formData.append("title", values.title);
+    if (values.video) {
+      formData.append("video", values.video);
+    }
     console.log(values);
+    mutate(formData);
   }
 
   return (
@@ -75,7 +111,7 @@ const AddVideoForm = () => {
           <div>
             <FormField
               control={form.control}
-              name="addTitle"
+              name="title"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-base font-semibold font-manrope tracking-[0%] leading-[120%] text-black">
@@ -198,11 +234,12 @@ const AddVideoForm = () => {
 
           <div className="mt-10 w-full flex items-center justify-end mb-[91px]">
             <Button
+              disabled={isPending}
               size={"lg"}
               className="h-[45px] bg-primary text-[#F4F4F4] font-manrope text-base leading-[120%] tracking-[0%] py-[13px] px-[41px] rounded-[8px]"
               type="submit"
             >
-              Publish
+              {isPending ? "Publishing..." : "Publish"}
             </Button>
           </div>
         </form>

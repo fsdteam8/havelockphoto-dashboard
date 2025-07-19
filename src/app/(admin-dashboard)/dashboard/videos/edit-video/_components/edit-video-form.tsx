@@ -14,29 +14,73 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Video, Upload, X } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  addTitle: z.string().min(2, {
+  title: z.string().min(2, {
     message: "Add Title must be at least 2 characters.",
   }),
   video: z.any().optional(),
 });
 
+export interface VideoInfo {
+  url: string;
+  type: string; // e.g., "video/mp4"
+}
+
+export interface SingleVideoData {
+  _id: string;
+  title: string;
+  video: VideoInfo;
+  createdBy: string; // MongoDB ObjectId as string
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+  __v: number;
+}
+
+export interface FetchSingleVideoResponse {
+  status: boolean;
+  message: string;
+  data: SingleVideoData;
+}
+
 const EditVideoForm = ({ videoId }: { videoId: string }) => {
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const router = useRouter();
+  const token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODcxZjUwZTlkMjFiOTI3YWI4YWY2NTEiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NTI4MTMxMzUsImV4cCI6MTc1MzQxNzkzNX0.8Fa9S3FtjWprAe_TMGeXM2lFOFHeQpIpGHYk6Adoyew";
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      addTitle: "",
+      title: "",
       video: undefined,
     },
   });
 
-  console.log(videoId);
+  const { data } = useQuery<FetchSingleVideoResponse>({
+    queryKey: ["single-video"],
+    queryFn: () =>
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/video/${videoId}`).then(
+        (res) => res.json()
+      ),
+  });
+
+  useEffect(() => {
+    if (data?.data) {
+      form.reset({
+        title: data.data.title,
+        video: data.data.video?.url,
+      });
+      setPreviewVideo(data.data.video?.url || null);
+    }
+  }, [data, form]);
 
   const handleVideoChange = (file: File) => {
     if (file && file.type.startsWith("video/")) {
@@ -65,8 +109,38 @@ const EditVideoForm = ({ videoId }: { videoId: string }) => {
     setIsDragOver(false);
   };
 
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["add-video"],
+    mutationFn: (formData: FormData) =>
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/video/${videoId}`, {
+        method: "PUT",
+        headers: {
+          // "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }).then((res) => res.json()),
+    onSuccess: (data) => {
+      if (!data?.status) {
+        toast.error(data?.message || "Failed to add video");
+        return;
+      }
+
+      toast.success("Video added successfully!");
+      setPreviewVideo(null);
+      form.reset();
+      router.push("/dashboard/videos");
+    },
+  });
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+    const formData = new FormData();
+    formData.append("title", values.title);
+    if (values.video) {
+      formData.append("video", values.video);
+    }
+    mutate(formData);
   }
 
   return (
@@ -77,7 +151,7 @@ const EditVideoForm = ({ videoId }: { videoId: string }) => {
           <div>
             <FormField
               control={form.control}
-              name="addTitle"
+              name="title"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-base font-semibold font-manrope tracking-[0%] leading-[120%] text-black">
@@ -200,11 +274,12 @@ const EditVideoForm = ({ videoId }: { videoId: string }) => {
 
           <div className="mt-10 w-full flex items-center justify-end mb-[91px]">
             <Button
+              disabled={isPending}
               size={"lg"}
               className="h-[45px] bg-primary text-[#F4F4F4] font-manrope text-base leading-[120%] tracking-[0%] py-[13px] px-[41px] rounded-[8px]"
               type="submit"
             >
-              Publish
+              {isPending ? "Publishing..." : "Publish"}
             </Button>
           </div>
         </form>
