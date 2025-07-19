@@ -1,6 +1,7 @@
 "use client";
 import DeleteModal from "@/components/modals/DeleteModal";
 import HavelockPhotoPagination from "@/components/ui/havelockphoto-pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SquarePen, Trash2 } from "lucide-react";
 import moment from "moment";
@@ -55,11 +56,11 @@ const VideosContainer = () => {
   const token =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODcxZjUwZTlkMjFiOTI3YWI4YWY2NTEiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NTI4MTMxMzUsImV4cCI6MTc1MzQxNzkzNX0.8Fa9S3FtjWprAe_TMGeXM2lFOFHeQpIpGHYk6Adoyew";
 
-      // delete api logic
+  // delete api logic
   const { mutate: deleteBlog } = useMutation({
     mutationKey: ["delete-video"],
     mutationFn: (id: string) =>
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/video/${id}`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/video/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -76,7 +77,7 @@ const VideosContainer = () => {
     },
   });
 
-    // delete modal logic
+  // delete modal logic
   const handleDelete = () => {
     if (selectedBlogId) {
       deleteBlog(selectedBlogId);
@@ -84,26 +85,61 @@ const VideosContainer = () => {
     setDeleteModalOpen(false);
   };
 
-  // get api 
+  // get api
   const { data, isLoading, isError, error } = useQuery<FetchAllVideosResponse>({
     queryKey: ["all-videos", currentPage],
     queryFn: () =>
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/video/get-all-videos?page=${currentPage}&limit=8`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/video/get-all-videos?page=${currentPage}&limit=8`
       ).then((res) => res.json()),
   });
 
   console.log(data?.data);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="w-full bg-gray-50 mt-10">
+        <div className="bg-white rounded-lg shadow-sm border">
+          {/* Header */}
+          <div className="flex items-center justify-between gap-10 p-4 border-b bg-gray-50 font-medium text-sm">
+            <div>Video Name</div>
+            <div>Date</div>
+            <div>Action</div>
+          </div>
+
+          {/* Skeleton Rows */}
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between gap-10 p-4 border-b last:border-b-0 "
+            >
+              {/* Event Name with Image */}
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-16 h-12 rounded" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+
+
+              {/* Date */}
+              <div className="space-y-1">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+
+              {/* Action */}
+              <div>
+                <Skeleton className="h-6 w-12 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (isError) {
     return <div>Error {error.message}</div>;
   }
-
-
 
   return (
     <div>
@@ -122,7 +158,7 @@ const VideosContainer = () => {
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="border-b border-[#B6B6B6]">
             {data?.data?.videos?.map((item) => (
               <tr
                 key={item._id}
@@ -131,7 +167,6 @@ const VideosContainer = () => {
                 <td className="w-[400px] flex items-center gap-[10px] pl-[50px] py-[10px]">
                   <div className="max-w-[100px]">
                     <video
-                      controls
                       className="w-full h-auto rounded"
                       src={item?.video?.url}
                     />
@@ -152,10 +187,13 @@ const VideosContainer = () => {
                       </button>
                     </Link>
 
-                    <button onClick={() => {
-                    setDeleteModalOpen(true);
-                    setSelectedBlogId(item?._id);
-                  }} className="-mt-2">
+                    <button
+                      onClick={() => {
+                        setDeleteModalOpen(true);
+                        setSelectedBlogId(item?._id);
+                      }}
+                      className="-mt-2"
+                    >
                       {" "}
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -166,28 +204,35 @@ const VideosContainer = () => {
           </tbody>
         </table>
       </div>
-      <div className="bg-white flex items-center justify-between py-[10px] px-[50px] border-t border-[#B6B6B6]">
-        <p className="text-sm font-medium leading-[120%] font-manrope text-[#707070]">
-          Showing 1 to 5 of 10 results
-        </p>
 
-        <div>
-          <HavelockPhotoPagination
-            totalPages={5}
-            currentPage={currentPage}
-            onPageChange={(page) => setCurrentPage(page)}
-          />
-        </div>
-      </div>
+      {data &&
+        data?.data &&
+        data?.data?.pagination &&
+        data?.data?.pagination?.totalPages > 1 && (
+          <div className="bg-white flex items-center justify-between py-[10px] px-[50px] border-t border-[#B6B6B6]">
+            {" "}
+            <p className="text-sm font-medium leading-[120%] font-manrope text-[#707070]">
+              Showing {currentPage} to 8 of {data?.data?.pagination?.totalData}{" "}
+              results
+            </p>
+            <div>
+              <HavelockPhotoPagination
+                totalPages={data?.data?.pagination?.totalPages}
+                currentPage={currentPage}
+                onPageChange={(page) => setCurrentPage(page)}
+              />
+            </div>{" "}
+          </div>
+        )}
 
       {/* delete modal  */}
-        {deleteModalOpen && (
-          <DeleteModal
-            isOpen={deleteModalOpen}
-            onClose={() => setDeleteModalOpen(false)}
-            onConfirm={handleDelete}
-          />
-        )}
+      {deleteModalOpen && (
+        <DeleteModal
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          onConfirm={handleDelete}
+        />
+      )}
     </div>
   );
 };
