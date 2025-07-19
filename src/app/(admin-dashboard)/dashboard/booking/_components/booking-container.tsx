@@ -1,60 +1,72 @@
 "use client";
+import { BookingResponse } from "@/components/types/booking-and-revenue";
 import HavelockPhotoPagination from "@/components/ui/havelockphoto-pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import moment from "moment";
 import Image from "next/image";
 import React, { useState } from "react";
 
 const BookingContainer = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  interface bookingDataType {
-    id: number;
-    img: string;
-    name: string;
-    price: string;
-    address: string;
-    date: string;
-  }
-  const bookingData: bookingDataType[] = [
-    {
-      id: 1,
-      img: "/assets/images/event1.jpg",
-      name: "LinkedIn Profile Picture",
-      price: "$200.00",
-      address: "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
-      date: "04/21/2025 03:18pm",
-    },
-    {
-      id: 2,
-      img: "/assets/images/event2.jpg",
-      name: "Branding Photography",
-      price: "$200.00",
-      address: "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
-      date: "04/21/2025 03:18pm",
-    },
-    {
-      id: 3,
-      img: "/assets/images/event1.jpg",
-      name: "LinkedIn Profile Picture",
-      price: "$200.00",
-      address: "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
-      date: "04/21/2025 03:18pm",
-    },
-    {
-      id: 4,
-      img: "/assets/images/event2.jpg",
-      name: "Branding Photography",
-      price: "$200.00",
-      address: "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
-      date: "04/21/2025 03:18pm",
-    },
-    {
-      id: 5,
-      img: "/assets/images/event1.jpg",
-      name: "Branding Photography",
-      price: "$200.00",
-      address: "2972 Westheimer Rd. Santa Ana, Illinois 85486 ",
-      date: "04/21/2025 03:18pm",
-    },
-  ];
+  const { data, isLoading, isError, error } = useQuery<BookingResponse>({
+    queryKey: ["booking-all-data", currentPage],
+    queryFn: () =>
+      fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/booking/summary?filter=all&page=${currentPage}&limit=8`
+      ).then((res) => res.json()),
+  });
+
+  console.log(data?.message?.bookings);
+
+  if (isLoading) return <div className="w-full bg-gray-50 mt-10">
+        <div className="bg-white rounded-lg shadow-sm border">
+          {/* Header */}
+          <div className="grid grid-cols-5 gap-4 p-4 border-b bg-gray-50 font-medium text-sm">
+            <div>Event Name</div>
+            <div>Price</div>
+            <div>Address</div>
+            <div>Date</div>
+            <div>Action</div>
+          </div>
+
+          {/* Skeleton Rows */}
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className="grid grid-cols-5 gap-4 p-4 border-b last:border-b-0 items-center"
+            >
+              {/* Event Name with Image */}
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-16 h-12 rounded" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+
+              {/* Price */}
+              <div>
+                <Skeleton className="h-4 w-12" />
+              </div>
+
+              {/* Address */}
+              <div>
+                <Skeleton className="h-4 w-16" />
+              </div>
+
+              {/* Date */}
+              <div className="space-y-1">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+
+              {/* Action */}
+              <div>
+                <Skeleton className="h-6 w-12 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+  if (isError) return <div>Error: {error?.message}</div>;
 
   return (
     <div>
@@ -79,40 +91,38 @@ const BookingContainer = () => {
               </th>
             </tr>
           </thead>
-          <tbody>
-            {bookingData.map((item) => (
+          <tbody className="border-b border-[#B6B6B6]">
+            {data?.message?.bookings.map((item) => (
               <tr
-                key={item.id}
-                className={`${
-                  item.id === 5 ? "border-b" : "border-b-0"
-                } border-t border-x border-[#B6B6B6] flex items-center justify-between gap-[155px]`}
+                key={item._id}
+                className={`border-t border-x border-[#B6B6B6] flex items-center justify-between gap-[155px]`}
               >
                 <td className="w-[300px] flex items-center gap-[10px] pl-[50px] py-[20px]">
                   <div className="max-w-[100px]">
                     <Image
-                      src={item.img}
-                      alt={item.name}
+                      src={item?.eventId?.images[0]}
+                      alt={item?.eventId?.title}
                       width={100}
                       height={60}
                       className="w-[100px] h-[60px] rounded-[8px] object-cover"
                     />
                   </div>
                   <h4 className="w-[190px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
-                    {item.name}
+                    {item?.eventId?.title}
                   </h4>
                 </td>
                 <td className="w-[100px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
-                  {item.price}
+                  {item?.eventId?.price}
                 </td>
                 <td className="w-[130px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
-                  {item.address}
+                  {item?.eventId?.location}
                 </td>
-                <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
-                  {item.date}
+                <td className="w-[140px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
+                  {moment(item.createdAt).format("MM/DD/YYYY hh:mma")}
                 </td>
                 <td className="w-[170px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-center pr-[50px] py-[20px] flex flex-col gap-2">
                   <button className="py-[5px] px-[15px] bg-[#008000] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope">
-                    Completed
+                    {item?.paymentStatus}
                   </button>
                   {/* <button className="py-[5px] px-[12px] bg-[#CBA0E3] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope">
                     Scheduling
@@ -123,18 +133,26 @@ const BookingContainer = () => {
           </tbody>
         </table>
       </div>
-      <div className="bg-white flex items-center justify-between py-[10px] px-[50px]">
-        <p className="text-sm font-medium leading-[120%] font-manrope text-[#707070]">
-          Showing 1 to 5 of 12 results
-        </p>
+      <div>
+        {data &&
+          data?.message &&
+          data?.message?.pagination &&
+          data?.message?.pagination?.totalPages > 1 && (
+            <div className="bg-white flex items-center justify-between py-[10px] px-[50px]">
+              <p className="text-sm font-medium leading-[120%] font-manrope text-[#707070]">
+                Showing {currentPage} to 8 of{" "}
+                {data?.message?.pagination?.totalData} results
+              </p>
 
-        <div>
-          <HavelockPhotoPagination
-            totalPages={5}
-            currentPage={currentPage}
-            onPageChange={(page) => setCurrentPage(page)}
-          />
-        </div>
+              <div>
+                <HavelockPhotoPagination
+                  totalPages={data?.message?.pagination?.totalPages}
+                  currentPage={currentPage}
+                  onPageChange={(page) => setCurrentPage(page)}
+                />
+              </div>
+            </div>
+          )}
       </div>
     </div>
   );

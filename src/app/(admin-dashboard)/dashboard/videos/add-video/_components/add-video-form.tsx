@@ -72,7 +72,7 @@ const AddVideoForm = () => {
   const { mutate, isPending } = useMutation({
     mutationKey: ["add-video"],
     mutationFn: (formData: FormData) =>
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/video`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/video`, {
         method: "POST",
         headers: {
           // "Content-Type": "application/json",
