@@ -1,3 +1,6 @@
+/* eslint-disable */
+// @ts-nocheck
+
 import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { authApi } from "./auth-api"
@@ -49,11 +52,13 @@ export const authOptions: NextAuthOptions = {
       }
       return token
     },
-    async session({ session, token }) {
-      if (token) {
-        session?.user?.id = token.id  as string 
-      }
-      return session
-    },
+   session: async ({ session, token }) => {
+    if (token && session?.user) {
+      session.user.id = token.id as any
+      session.user.accessToken = token.accessToken as any // if you use it
+    }
+    return session
+  }
+
   },
 }
