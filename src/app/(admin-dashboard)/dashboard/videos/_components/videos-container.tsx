@@ -1,6 +1,7 @@
 "use client";
 import DeleteModal from "@/components/modals/DeleteModal";
 import HavelockPhotoPagination from "@/components/ui/havelockphoto-pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SquarePen, Trash2 } from "lucide-react";
 import moment from "moment";
@@ -59,7 +60,7 @@ const VideosContainer = () => {
   const { mutate: deleteBlog } = useMutation({
     mutationKey: ["delete-video"],
     mutationFn: (id: string) =>
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/video/${id}`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/video/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -89,14 +90,51 @@ const VideosContainer = () => {
     queryKey: ["all-videos", currentPage],
     queryFn: () =>
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/video/get-all-videos?page=${currentPage}&limit=8`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/video/get-all-videos?page=${currentPage}&limit=8`
       ).then((res) => res.json()),
   });
 
   console.log(data?.data);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="w-full bg-gray-50 mt-10">
+        <div className="bg-white rounded-lg shadow-sm border">
+          {/* Header */}
+          <div className="flex items-center justify-between gap-10 p-4 border-b bg-gray-50 font-medium text-sm">
+            <div>Video Name</div>
+            <div>Date</div>
+            <div>Action</div>
+          </div>
+
+          {/* Skeleton Rows */}
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between gap-10 p-4 border-b last:border-b-0 "
+            >
+              {/* Event Name with Image */}
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-16 h-12 rounded" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+
+
+              {/* Date */}
+              <div className="space-y-1">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+
+              {/* Action */}
+              <div>
+                <Skeleton className="h-6 w-12 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (isError) {

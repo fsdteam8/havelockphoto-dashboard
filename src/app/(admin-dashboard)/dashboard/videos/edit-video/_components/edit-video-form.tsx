@@ -67,7 +67,7 @@ const EditVideoForm = ({ videoId }: { videoId: string }) => {
   const { data } = useQuery<FetchSingleVideoResponse>({
     queryKey: ["single-video"],
     queryFn: () =>
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/video/${videoId}`).then(
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/video/${videoId}`).then(
         (res) => res.json()
       ),
   });
@@ -112,7 +112,7 @@ const EditVideoForm = ({ videoId }: { videoId: string }) => {
   const { mutate, isPending } = useMutation({
     mutationKey: ["add-video"],
     mutationFn: (formData: FormData) =>
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/video/${videoId}`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/video/${videoId}`, {
         method: "PUT",
         headers: {
           // "Content-Type": "application/json",

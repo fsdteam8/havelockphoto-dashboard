@@ -18,6 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const description = "A bar chart";
 
@@ -45,17 +46,66 @@ export interface MonthlyBookingSummary {
   bookingsCount: number; // e.g., 5
 }
 
-
 export function RevenueStatistics() {
   const { data, isLoading, isError, error } = useQuery<BookingSummaryResponse>({
     queryKey: ["revenue-statistics"],
     queryFn: () =>
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/booking/summary?filter=month&year=2025`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/booking/summary?filter=month&year=2025`
       ).then((res) => res.json()),
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading)
+    return (
+      <div className="w-full bg-white rounded-lg">
+        <Card className="w-full">
+          <CardHeader className="pb-4">
+            {/* Title Skeleton */}
+            <Skeleton className="h-6 w-48" />
+            {/* Subtitle Skeleton */}
+            <Skeleton className="h-4 w-32 mt-2" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Chart Area Skeleton */}
+              <div className="relative h-64 flex items-end justify-between gap-2 px-4">
+                {Array.from({ length: 12 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center gap-1 flex-1"
+                  >
+                    <div className="flex items-end gap-1 h-48">
+                      {/* Primary Bar Skeleton */}
+                      <Skeleton
+                        className="min-w-[12px] rounded-t-sm"
+                        style={{
+                          height: `${Math.random() * 60 + 40}%`, // Random heights between 40-100%
+                        }}
+                      />
+                      {/* Secondary Bar Skeleton */}
+                      <Skeleton
+                        className="min-w-[12px] rounded-t-sm"
+                        style={{
+                          height: `${Math.random() * 50 + 30}%`, // Random heights between 30-80%
+                        }}
+                      />
+                    </div>
+                    {/* Month Label Skeleton */}
+                    <Skeleton className="h-3 w-6 mt-2" />
+                  </div>
+                ))}
+              </div>
+
+              {/* Trending Information Skeleton */}
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className="h-4 w-40" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   if (isError) return <div>Error: {error?.message}</div>;
 
   console.log(data?.message);
