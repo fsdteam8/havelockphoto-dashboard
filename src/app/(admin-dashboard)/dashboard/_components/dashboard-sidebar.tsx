@@ -5,9 +5,21 @@ import React from "react";
 import { DashboardSidebarItems } from "./dashboard-sidebar-items";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { signOut } from "next-auth/react";
 
 const DashboardSidebar = () => {
+  
   const pathName = usePathname();
+    const handleSignOut = async () => {
+    toast({
+      title: "Signing Out",
+      description: "You have been successfully signed out.",
+      variant: "default",
+    })
+    await signOut({ callbackUrl: "/login" })
+  }
+
   return (
     <aside className="w-[350px] h-screen sticky top-0 z-50 bg-[#FAFAFA] border-r border-[#D9D9D9] py-6 px-4 -mt-[100px] overflow-hidden">
       <div className="h-full flex flex-col items-center relative">
@@ -38,7 +50,7 @@ const DashboardSidebar = () => {
         </nav>
 
         <div className="w-full px-4 absolute bottom-5">
-          <button className="flex items-center justify-start gap-3 text-lg font-semibold text-[#1F2937] leading-[120%] font-manrope">
+          <button onClick={handleSignOut} className="flex items-center justify-start gap-3 text-lg font-semibold text-[#1F2937] leading-[120%] font-manrope">
             <LogOut /> Log Out
           </button>
         </div>

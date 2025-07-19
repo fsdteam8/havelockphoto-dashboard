@@ -3,7 +3,7 @@ import "./globals.css";
 
 import { Manrope } from "next/font/google";
 import AppProvider from "@/components/provider/AppProvider";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -12,8 +12,8 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "have lock photo",
-  description: "have lock photo",
+  title: "PRO VIZ",
+  description: "Event Photography Dashboard. Manage your events, bookings, and more with ease.",
 };
 
 export default function RootLayout({
@@ -24,8 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${manrope.variable} antialiased`}>
-        <AppProvider>{children}</AppProvider>
-        <Toaster position="top-right" />
+        <AppProvider>{children}<Toaster /></AppProvider>
       </body>
     </html>
   );
