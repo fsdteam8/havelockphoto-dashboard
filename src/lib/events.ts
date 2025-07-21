@@ -8,11 +8,11 @@ import type {
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
 
-async function getAuthHeaders(isFormData = false) {
+async function getAuthHeaders() {
   const session = await getSession();
   console.log(session);
   return {
-    ...(isFormData ? {} : { "Content-Type": "application/json" }),
+    "Content-Type": "application/json",
     Authorization: `Bearer ${session?.accessToken || ""}`,
   };
 }
@@ -20,7 +20,8 @@ async function getAuthHeaders(isFormData = false) {
 export const eventApi = {
   // Create event
   createEvent: async (data: FormData): Promise<EventResponse> => {
-    const headers = await getAuthHeaders(true); // true for FormData
+    const headers = await getAuthHeaders();
+    delete headers["Content-Type"]; // Let browser set correct content type for FormData
     const response = await fetch(`${BASE_URL}/event`, {
       method: "POST",
       headers,
@@ -52,13 +53,14 @@ export const eventApi = {
   // Update event
   updateEvent: async (
     eventId: string,
-    data: CreateEventRequest
+    data: FormData
   ): Promise<EventResponse> => {
     const headers = await getAuthHeaders();
+    const { "Content-Type": _, ...headerWithoutContentType } = headers; // Remove Content-Type for FormData
     const response = await fetch(`${BASE_URL}/event/${eventId}`, {
       method: "PUT",
-      headers,
-      body: JSON.stringify(data),
+      headers: headerWithoutContentType,
+      body: data,
     });
 
     if (!response.ok) {

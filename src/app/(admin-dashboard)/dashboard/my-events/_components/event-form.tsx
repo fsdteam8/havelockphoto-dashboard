@@ -236,6 +236,9 @@ export default function EventForm({ event, mode }: EventFormProps) {
     try {
       // Add all text fields with validation
       console.log("Adding form fields...");
+      if (mode === "edit" && event) {
+        formData.append("_id", event._id);
+      }
       formData.append("title", data.title);
       formData.append("description", data.description);
       formData.append("price", data.price.toString());
@@ -287,13 +290,11 @@ export default function EventForm({ event, mode }: EventFormProps) {
 
       console.log("Submitting to mutation...");
       if (mode === "create") {
-        const result = await createEventMutation.mutateAsync(formData as any);
+        const result = await createEventMutation.mutateAsync(formData);
         console.log("Create mutation result:", result);
       } else if (event) {
-        const result = await updateEventMutation.mutateAsync({
-          eventId: event._id,
-          data: formData as any,
-        });
+        // Pass formData directly to update mutation
+        const result = await updateEventMutation.mutateAsync(formData);
         console.log("Update mutation result:", result);
       }
 

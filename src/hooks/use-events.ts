@@ -45,8 +45,13 @@ export const useUpdateEvent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ eventId, data }: { eventId: string; data: FormData }) =>
-      eventApi.updateEvent(eventId, data),
+    mutationFn: (formData: FormData) => {
+      const eventId = formData.get("_id") as string;
+      if (!eventId) {
+        throw new Error("Event ID is required for update");
+      }
+      return eventApi.updateEvent(eventId, formData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
       queryClient.invalidateQueries({ queryKey: ["event"] });
