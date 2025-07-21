@@ -3,27 +3,28 @@ import type {
   CreateEventRequest,
   EventResponse,
   EventsResponse,
-} from "@/types/event";
+} from "@/components/types/event";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
 
-async function getAuthHeaders() {
+async function getAuthHeaders(isFormData = false) {
   const session = await getSession();
+  console.log(session);
   return {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     Authorization: `Bearer ${session?.accessToken || ""}`,
   };
 }
 
 export const eventApi = {
   // Create event
-  createEvent: async (data: CreateEventRequest): Promise<EventResponse> => {
-    const headers = await getAuthHeaders();
+  createEvent: async (data: FormData): Promise<EventResponse> => {
+    const headers = await getAuthHeaders(true); // true for FormData
     const response = await fetch(`${BASE_URL}/event`, {
       method: "POST",
       headers,
-      body: JSON.stringify(data),
+      body: data,
     });
 
     if (!response.ok) {

@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { eventApi } from "@/lib/events";
-import type { CreateEventRequest } from "@/components/types/event";
 import { toast } from "@/hooks/use-toast";
 
 export const useEvents = () => {
@@ -24,7 +23,7 @@ export const useCreateEvent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: eventApi.createEvent,
+    mutationFn: (data: FormData) => eventApi.createEvent(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
       toast({
@@ -46,13 +45,8 @@ export const useUpdateEvent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      eventId,
-      data,
-    }: {
-      eventId: string;
-      data: CreateEventRequest;
-    }) => eventApi.updateEvent(eventId, data),
+    mutationFn: ({ eventId, data }: { eventId: string; data: FormData }) =>
+      eventApi.updateEvent(eventId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
       queryClient.invalidateQueries({ queryKey: ["event"] });
