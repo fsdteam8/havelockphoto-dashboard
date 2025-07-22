@@ -19,7 +19,9 @@ const BookingContainer = () => {
 
   console.log(data?.message?.bookings);
 
-  if (isLoading) return <div className="w-full bg-gray-50 mt-10">
+  if (isLoading)
+    return (
+      <div className="w-full bg-gray-50 mt-10">
         <div className="bg-white rounded-lg shadow-sm border">
           {/* Header */}
           <div className="grid grid-cols-5 gap-4 p-4 border-b bg-gray-50 font-medium text-sm">
@@ -66,6 +68,7 @@ const BookingContainer = () => {
           ))}
         </div>
       </div>
+    );
   if (isError) return <div>Error: {error?.message}</div>;
 
   return (

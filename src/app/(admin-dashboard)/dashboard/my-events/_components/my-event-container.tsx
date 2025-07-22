@@ -1,78 +1,85 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+
 import HavelockPhotoPagination from "@/components/ui/havelockphoto-pagination";
-import { SquarePen, Trash2 } from "lucide-react";
+import { SquarePen, Trash2, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useState } from "react";
+import { useEvents, useDeleteEvent } from "@/hooks/use-events";
+import type { Event } from "@/components/types/event";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const MyEventsContainer = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  interface bookingDataType {
-    id: number;
-    img: string;
-    name: string;
-    price: string;
-    type: string;
-    date: string;
+  const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
+
+  const { data: events, isLoading, error } = useEvents();
+  const deleteEventMutation = useDeleteEvent();
+
+  const itemsPerPage = 7;
+  const totalPages = Math.ceil((events?.length || 0) / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentEvents = events?.slice(startIndex, endIndex) || [];
+
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      await deleteEventMutation.mutateAsync(eventId);
+      setDeleteEventId(null);
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
+  };
+
+  const formatEventDate = (event: Event) => {
+    if (event.schedule && event.schedule.length > 0) {
+      const firstSchedule = event.schedule[0];
+      const date = new Date(firstSchedule.date);
+      return format(date, "MM/dd/yyyy") + ` ${firstSchedule.startTime}`;
+    }
+    return format(new Date(event.createdAt), "MM/dd/yyyy hh:mm a");
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin" />
+        <span className="ml-2">Loading events...</span>
+      </div>
+    );
   }
-  const bookingData: bookingDataType[] = [
-    {
-      id: 1,
-      img: "/assets/images/event1.jpg",
-      name: "LinkedIn Profile Picture",
-      price: "$150.00",
-      type: "In Studio",
-      date: "04/21/2025 03:18pm",
-    },
-    {
-      id: 2,
-      img: "/assets/images/event2.jpg",
-      name: "Branding Photography",
-      price: "$399.00",
-      type: "In Studio",
-      date: "04/21/2025 03:18pm",
-    },
-    {
-      id: 3,
-      img: "/assets/images/event1.jpg",
-      name: "LinkedIn Profile Picture",
-      price: "$200.00",
-      type: "In Studio",
-      date: "04/21/2025 03:18pm",
-    },
-    {
-      id: 4,
-      img: "/assets/images/event2.jpg",
-      name: "Branding Photography",
-      price: "$200.00",
-      type: "In Studio",
-      date: "04/21/2025 03:18pm",
-    },
-    {
-      id: 5,
-      img: "/assets/images/event1.jpg",
-      name: "Branding Photography",
-      price: "$200.00",
-      type: "In Studio",
-      date: "04/21/2025 03:18pm",
-    },
-    {
-      id: 6,
-      img: "/assets/images/event2.jpg",
-      name: "Branding Photography",
-      price: "$200.00",
-      type: "In Studio",
-      date: "04/21/2025 03:18pm",
-    },
-    {
-      id: 7,
-      img: "/assets/images/event1.jpg",
-      name: "Branding Photography",
-      price: "$200.00",
-      type: "In Studio",
-      date: "04/21/2025 03:18pm",
-    },
-  ];
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-500">Error loading events. Please try again.</p>
+      </div>
+    );
+  }
+
+  if (!events || events.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">No events found.</p>
+        <Link href="/dashboard/my-events/create-event">
+          <Button className="mt-4">Create Your First Event</Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -98,48 +105,79 @@ const MyEventsContainer = () => {
             </tr>
           </thead>
           <tbody>
-            {bookingData.map((item) => (
+            {currentEvents.map((event, index) => (
               <tr
-                key={item.id}
+                key={event._id}
                 className={`${
-                  item.id === 7 ? "border-b" : "border-b-0"
+                  index === currentEvents.length - 1 ? "border-b" : "border-b-0"
                 } border-t border-x border-[#B6B6B6] flex items-center justify-between gap-[135px]`}
               >
                 <td className="w-[400px] flex items-center gap-[10px] pl-[50px] py-[10px]">
                   <div className="max-w-[100px] ">
                     <Image
-                      src={item.img}
-                      alt={item.name}
+                      src={
+                        event.thumbnail ||
+                        "/placeholder.svg?height=60&width=100&query=event"
+                      }
+                      alt={event.title}
                       width={100}
                       height={60}
                       className="w-[100px] h-[60px] rounded-[8px] object-cover"
                     />
                   </div>
                   <h4 className="w-[290px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
-                    {item.name}
+                    {event.title}
                   </h4>
                 </td>
                 <td className="w-[100px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
-                  {item.price}
+                  ${event.price.toFixed(2)}
                 </td>
                 <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
-                  {item.type}
+                  {event.type}
                 </td>
                 <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
-                  {item.date}
+                  {formatEventDate(event)}
                 </td>
                 <td className="w-[130px] text-right py-[10px] pr-[50px]">
                   <div className="flex items-center justify-end gap-4">
-                    <Link href={`/dashboard/my-events/edit-event/${item.id}`}>
+                    <Link href={`/dashboard/my-events/edit-event/${event._id}`}>
                       <button>
                         <SquarePen className="w-5 h-5" />
                       </button>
                     </Link>
 
-                    <button className="-mt-2">
-                      {" "}
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button className="-mt-2">
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete the event &apos;{event.title}&apos;.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteEvent(event._id)}
+                            disabled={deleteEventMutation.isPending}
+                          >
+                            {deleteEventMutation.isPending ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                Deleting...
+                              </>
+                            ) : (
+                              "Delete"
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </td>
               </tr>
@@ -149,12 +187,12 @@ const MyEventsContainer = () => {
       </div>
       <div className="bg-white flex items-center justify-between py-[10px] px-[50px]">
         <p className="text-sm font-medium leading-[120%] font-manrope text-[#707070]">
-          Showing 1 to 5 of 10 results
+          Showing {startIndex + 1} to {Math.min(endIndex, events.length)} of{" "}
+          {events.length} results
         </p>
-
         <div>
           <HavelockPhotoPagination
-            totalPages={5}
+            totalPages={totalPages}
             currentPage={currentPage}
             onPageChange={(page) => setCurrentPage(page)}
           />
