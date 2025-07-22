@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/chart";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import HavelockphotoDropDownSelector from "@/components/ui/HavelockphotoDropDownSelector";
+import { useState } from "react";
 
 export const description = "A simple area chart";
 
@@ -41,12 +43,26 @@ export interface MonthlyBookingSummary {
   bookingsCount: number; // e.g., 5
 }
 
+const yearList = [
+  { id: 4, name: "2023", value: 2023 },
+  { id: 5, name: "2024", value: 2024 },
+  { id: 6, name: "2025", value: 2025 },
+  { id: 7, name: "2026", value: 2026 },
+  { id: 8, name: "2027", value: 2027 },
+  { id: 9, name: "2028", value: 2028 },
+  { id: 10, name: "2029", value: 2029 },
+  { id: 11, name: "2030", value: 2030 },
+];
+
 export function BookingSummery() {
+  const [selectedYear, setSelectedYear] = useState<string | number | undefined>(
+    new Date().getFullYear()
+  );
   const { data, isLoading, isError, error } = useQuery<BookingSummaryResponse>({
-    queryKey: ["booking-summery"],
+    queryKey: ["booking-summery", selectedYear],
     queryFn: () =>
       fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/booking/summary?filter=month&year=2025`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/booking/summary?filter=month&year=${selectedYear}`
       ).then((res) => res.json()),
   });
 
@@ -106,14 +122,24 @@ export function BookingSummery() {
   console.log(data?.message);
   return (
     <Card className="bg-[#FAFAFA] max-h-[426px] mt-[29px] mb-[60px]">
-      <CardHeader>
-        <CardTitle className="text-[32px] font-semibold text-[#1C2024] leading-[16px] pb-[6px]">
-          Booking Summery
-        </CardTitle>
-        <CardDescription className="text-sm text-[#60646C] leading-[120%] font-normal">
-          Showing total visitors for 1 year
-        </CardDescription>
-      </CardHeader>
+      <div className="w-full flex items-center justify-between pr-10">
+        <CardHeader>
+          <CardTitle className="text-[32px] font-semibold text-[#1C2024] leading-[16px] pb-[6px]">
+            Booking Summery
+          </CardTitle>
+          <CardDescription className="text-sm text-[#60646C] leading-[120%] font-normal">
+            Showing total visitors for 1 year
+          </CardDescription>
+        </CardHeader>
+        <div className="text-primary ">
+          <HavelockphotoDropDownSelector
+            list={yearList}
+            selectedValue={selectedYear}
+            onValueChange={setSelectedYear}
+            placeholderText="Select a year"
+          />
+        </div>
+      </div>
       <CardContent>
         <ChartContainer config={chartConfig} className="w-full max-h-[285px]">
           <AreaChart
