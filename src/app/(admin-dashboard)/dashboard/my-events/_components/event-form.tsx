@@ -36,10 +36,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { Event, DurationUnit } from "@/components/types/event";
+import type { Event } from "@/components/types/event";
 import { useCreateEvent, useUpdateEvent } from "@/hooks/use-events";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 
 const eventSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -67,10 +68,10 @@ interface EventFormProps {
   mode: "create" | "edit";
 }
 
-const durationUnits: DurationUnit[] = [
-  { value: "h", label: "Hours" },
-  { value: "m", label: "Minutes" },
-];
+// const durationUnits: DurationUnit[] = [
+//   { value: "h", label: "Hours" },
+//   { value: "m", label: "Minutes" },
+// ];
 
 export default function EventForm({ event, mode }: EventFormProps) {
   const router = useRouter();
@@ -83,7 +84,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
     handleSubmit,
     setValue,
     watch,
-    getValues,
+    // getValues,
     formState: { errors, isValid },
   } = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
@@ -269,7 +270,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
         Array.from(formData.entries()).length
       );
 
-      for (const [key, value] of formData.entries()) {
+      Array.from(formData.entries()).forEach(([key, value]) => {
         if (value instanceof File) {
           console.log(
             `${key}:`,
@@ -278,7 +279,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
         } else {
           console.log(`${key}:`, value);
         }
-      }
+      });
 
       // Additional check for empty FormData
       const formDataArray = Array.from(formData.entries());
@@ -563,7 +564,9 @@ export default function EventForm({ event, mode }: EventFormProps) {
                   </div>
                 ) : (
                   <div className="relative">
-                    <img
+                    <Image
+                      width={400}
+                      height={200}
                       src={thumbnailPreview || "/placeholder.svg"}
                       alt="Thumbnail preview"
                       className="w-full h-48 object-cover rounded-lg border"
@@ -621,7 +624,9 @@ export default function EventForm({ event, mode }: EventFormProps) {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {imagesPreviews.map((preview, index) => (
                       <div key={index} className="relative group">
-                        <img
+                        <Image
+                          width={200}
+                          height={200}
                           src={preview || "/placeholder.svg"}
                           alt={`Preview ${index + 1}`}
                           className="w-full h-24 object-cover rounded-lg border"

@@ -88,7 +88,7 @@ export const authApi = {
   },
 
   resetPassword: async (data: ResetPasswordRequest) => {
-    const response = await fetch(`${BASE_URL}/auth/verify-code`, {
+    const response = await fetch(`${BASE_URL}/auth/reset-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
