@@ -422,13 +422,13 @@ export default function EventForm({ event, mode }: EventFormProps) {
     createEventMutation.isPending || updateEventMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-gray-50 py-8 my-10 rounded-lg">
+      <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="mb-8 px-4">
+          {/* <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {mode === "create" ? "Create New Event" : "Edit Event"}
-          </h1>
+          </h1> */}
           <p className="text-gray-600">
             {mode === "create"
               ? "Fill in the details below to create your event"
@@ -503,7 +503,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
                         <Badge
                           key={index}
                           variant="secondary"
-                          className="flex items-center gap-1"
+                          className="flex items-center gap-1 text-white"
                         >
                           {type}
                           <Button
@@ -869,7 +869,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
                 <Label className="text-sm font-medium text-gray-700">
                   Event Thumbnail *
                 </Label>
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="text-xs text-white">
                   Recommended: 16:9 ratio
                 </Badge>
               </div>
