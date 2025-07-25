@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   title: "PRO VIZ | Event Photography Dashboard",
   description:
     "Event Photography Dashboard. Manage your events, bookings, and more with ease.",
+  icons: {
+    icon: "/assets/images/logo.png",
+  },
 };
 
 export default function RootLayout({

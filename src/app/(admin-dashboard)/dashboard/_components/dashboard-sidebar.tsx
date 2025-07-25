@@ -51,7 +51,7 @@ const DashboardSidebar = () => {
         <div className="w-full px-4 absolute bottom-5">
           <button
             onClick={handleSignOut}
-            className="flex items-center justify-start gap-3 text-lg font-semibold text-[#1F2937] leading-[120%] font-manrope"
+            className="flex items-center justify-start gap-3 text-lg font-semibold text-[#ff1818] leading-[120%] font-manrope"
           >
             <LogOut /> Log Out
           </button>
