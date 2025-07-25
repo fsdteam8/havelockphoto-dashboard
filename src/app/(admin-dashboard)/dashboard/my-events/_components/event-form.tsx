@@ -1,11 +1,11 @@
 "use client";
+
 import { useForm, useFieldArray } from "react-hook-form";
 import type React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -13,9 +13,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"; // Re-added Select imports
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
   CalendarIcon,
@@ -27,10 +26,10 @@ import {
   MapPin,
   DollarSign,
   FileText,
+  X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-
 import {
   Popover,
   PopoverContent,
@@ -42,23 +41,37 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 
+// Updated schema to re-introduce durationValue and durationUnit
 const eventSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  description: z.string().min(1, "Description is required"),
-  price: z.number().min(0, "Price must be positive"),
-  type: z.string().min(1, "Type is required"),
-  durationValue: z.number().min(1, "Duration value is required"),
-  durationUnit: z.enum(["h", "m"]),
+  // description: z.string().min(1, "Description is required"), // Re-added description to schema
+  price: z.coerce.number().nonnegative("Price must be non-negative"),
+  type: z.array(z.string()).min(1, "At least one type is required"),
+  durationValue: z.coerce.number().positive("Duration value must be positive"), // Duration value
+  durationUnit: z.enum(["h", "m"], { message: "Duration unit is required" }), // Duration unit
+  date: z.string().datetime("Invalid date format"),
   location: z.string().min(1, "Location is required"),
   schedule: z
     .array(
       z.object({
-        date: z.string().min(1, "Date is required"),
-        startTime: z.string().min(1, "Start time is required"),
-        endTime: z.string().min(1, "End time is required"),
+        date: z.string().datetime("Invalid date format"),
+        startTime: z.string().regex(/^\d{2}:\d{2}$/, {
+          message: "Invalid startTime format. Expected HH:mm",
+        }),
+        endTime: z.string().regex(/^\d{2}:\d{2}$/, {
+          message: "Invalid endTime format. Expected HH:mm",
+        }),
       })
     )
     .min(1, "At least one schedule is required"),
+  eventDetails: z
+    .array(
+      z.object({
+        types: z.array(z.string()).min(1, "At least one type is required"),
+        image: z.string().optional(), // Will be populated after upload
+      })
+    )
+    .optional(),
 });
 
 type EventFormData = z.infer<typeof eventSchema>;
@@ -68,10 +81,12 @@ interface EventFormProps {
   mode: "create" | "edit";
 }
 
-// const durationUnits: DurationUnit[] = [
-//   { value: "h", label: "Hours" },
-//   { value: "m", label: "Minutes" },
-// ];
+interface EventDetailState {
+  types: string[];
+  imageFile: File | null;
+  imagePreview: string | null;
+  currentTypeInput: string;
+}
 
 export default function EventForm({ event, mode }: EventFormProps) {
   const router = useRouter();
@@ -84,20 +99,33 @@ export default function EventForm({ event, mode }: EventFormProps) {
     handleSubmit,
     setValue,
     watch,
-    // getValues,
-    formState: { errors, isValid },
-  } = useForm<EventFormData>({
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(eventSchema),
-    mode: "onChange", // Enable real-time validation
+    mode: "onChange",
     defaultValues: {
       title: event?.title || "",
-      description: event?.description || "",
+      // description: event?.description || "", // Re-added description default value
       price: event?.price || 0,
-      type: event?.type || "",
-      durationValue: event ? Number.parseInt(event.duration) : 1,
-      durationUnit: event ? (event.duration.includes("h") ? "h" : "m") : "m",
+      type: event?.type || [],
+      durationValue: event ? Number.parseInt(event.duration) : 15, // Parse duration string
+      durationUnit: event ? (event.duration.includes("h") ? "h" : "m") : "m", // Parse duration unit
+      date: event?.schedule?.[0]?.date
+        ? new Date(event.schedule[0].date).toISOString()
+        : new Date().toISOString(),
       location: event?.location || "",
-      schedule: event?.schedule || [{ date: "", startTime: "", endTime: "" }],
+      schedule: event?.schedule?.map((s) => ({
+        date: new Date(s.date).toISOString(),
+        startTime: s.startTime,
+        endTime: s.endTime,
+      })) || [
+        {
+          date: new Date().toISOString(),
+          startTime: "",
+          endTime: "",
+        },
+      ],
+      eventDetails: event?.eventDetails || [],
     },
   });
 
@@ -106,28 +134,151 @@ export default function EventForm({ event, mode }: EventFormProps) {
     name: "schedule",
   });
 
+  // State for main event types
+  const [eventTypes, setEventTypes] = useState<string[]>(event?.type || []);
+  const [currentTypeInput, setCurrentTypeInput] = useState("");
+
+  // State for event details
+  const [eventDetails, setEventDetails] = useState<EventDetailState[]>(
+    event?.eventDetails?.map((detail) => ({
+      types: detail.types,
+      imageFile: null,
+      imagePreview: detail.image,
+      currentTypeInput: "",
+    })) || []
+  );
+
+  // Main media state
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
     event?.thumbnail || null
   );
-  const [imagesPreviews, setImagesPreviews] = useState<string[]>(
-    event?.images || []
-  );
 
-  // Debug function to log current form state
-  // const debugFormState = () => {
-  //   const currentValues = getValues();
-  //   console.log("=== FORM DEBUG INFO ===");
-  //   console.log("Current form values:", currentValues);
-  //   console.log("Form validation errors:", errors);
-  //   console.log("Is form valid:", isValid);
-  //   console.log("Thumbnail file:", thumbnailFile);
-  //   console.log("Image files:", imageFiles);
-  //   console.log("Thumbnail preview:", thumbnailPreview);
-  //   console.log("Images previews:", imagesPreviews);
-  //   console.log("=======================");
-  // };
+  // Main Event Types Functions
+  const addEventType = (type: string) => {
+    if (!type.trim() || eventTypes.includes(type.trim())) return;
+
+    const newTypes = [...eventTypes, type.trim()];
+    setEventTypes(newTypes);
+    setValue("type", newTypes);
+    setCurrentTypeInput("");
+  };
+
+  const removeEventType = (index: number) => {
+    const newTypes = eventTypes.filter((_, i) => i !== index);
+    setEventTypes(newTypes);
+    setValue("type", newTypes);
+  };
+
+  // Event Details Functions
+  const addEventDetail = () => {
+    setEventDetails((prev) => [
+      ...prev,
+      {
+        types: [],
+        imageFile: null,
+        imagePreview: null,
+        currentTypeInput: "",
+      },
+    ]);
+  };
+
+  const removeEventDetail = (index: number) => {
+    setEventDetails((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const addTypeToEventDetail = (detailIndex: number, type: string) => {
+    if (!type.trim()) return;
+
+    setEventDetails((prev) =>
+      prev.map((detail, index) => {
+        if (index === detailIndex) {
+          return {
+            ...detail,
+            types: [...detail.types, type.trim()],
+            currentTypeInput: "",
+          };
+        }
+        return detail;
+      })
+    );
+  };
+
+  const removeTypeFromEventDetail = (
+    detailIndex: number,
+    typeIndex: number
+  ) => {
+    setEventDetails((prev) =>
+      prev.map((detail, index) => {
+        if (index === detailIndex) {
+          return {
+            ...detail,
+            types: detail.types.filter((_, i) => i !== typeIndex),
+          };
+        }
+        return detail;
+      })
+    );
+  };
+
+  const updateEventDetailTypeInput = (detailIndex: number, value: string) => {
+    setEventDetails((prev) =>
+      prev.map((detail, index) => {
+        if (index === detailIndex) {
+          return {
+            ...detail,
+            currentTypeInput: value,
+          };
+        }
+        return detail;
+      })
+    );
+  };
+
+  const handleEventDetailImageChange = (
+    detailIndex: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File size must be less than 5MB");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEventDetails((prev) =>
+          prev.map((detail, index) => {
+            if (index === detailIndex) {
+              return {
+                ...detail,
+                imageFile: file,
+                imagePreview: reader.result as string,
+              };
+            }
+            return detail;
+          })
+        );
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeEventDetailImage = (detailIndex: number) => {
+    setEventDetails((prev) =>
+      prev.map((detail, index) => {
+        if (index === detailIndex) {
+          return {
+            ...detail,
+            imageFile: null,
+            imagePreview: null,
+          };
+        }
+        return detail;
+      })
+    );
+  };
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -136,7 +287,6 @@ export default function EventForm({ event, mode }: EventFormProps) {
         alert("File size must be less than 5MB");
         return;
       }
-      console.log("Setting thumbnail file:", file.name, file.size);
       setThumbnailFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -146,58 +296,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
     }
   };
 
-  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    console.log(
-      "Selected image files:",
-      files.map((f) => ({ name: f.name, size: f.size }))
-    );
-
-    const validFiles = files.filter((file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        alert(`File ${file.name} is too large. Max size is 5MB`);
-        return false;
-      }
-      return true;
-    });
-
-    console.log(
-      "Valid image files:",
-      validFiles.map((f) => ({ name: f.name, size: f.size }))
-    );
-    setImageFiles((prev) => {
-      const newFiles = [...prev, ...validFiles];
-      console.log(
-        "Updated image files array:",
-        newFiles.map((f) => ({ name: f.name, size: f.size }))
-      );
-      return newFiles;
-    });
-
-    validFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagesPreviews((prev) => [...prev, reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeImage = (index: number) => {
-    console.log("Removing image at index:", index);
-    setImageFiles((prev) => {
-      const newFiles = prev.filter((_, i) => i !== index);
-      console.log(
-        "Updated image files after removal:",
-        newFiles.map((f) => ({ name: f.name, size: f.size }))
-      );
-      return newFiles;
-    });
-    setImagesPreviews((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const removeThumbnail = () => {
-    console.log("Removing thumbnail");
     setThumbnailFile(null);
     setThumbnailPreview(null);
   };
@@ -205,19 +304,16 @@ export default function EventForm({ event, mode }: EventFormProps) {
   const onSubmit = async (data: EventFormData) => {
     console.log("=== FORM SUBMISSION START ===");
     console.log("Form data received:", data);
-    console.log("Thumbnail file:", thumbnailFile);
-    console.log("Image files:", imageFiles);
-    console.log("Form validation state:", { isValid, errors });
+    console.log("Event types:", eventTypes);
+    console.log("Event details:", eventDetails);
 
     // Validate that we have the required data
-    if (!data.title || !data.description || !data.type || !data.location) {
-      console.error("Missing required fields!");
+    if (!data.title || !eventTypes.length || !data.location) {
       alert("Please fill in all required fields");
       return;
     }
 
     if (!data.schedule || data.schedule.length === 0) {
-      console.error("No schedule data!");
       alert("Please add at least one schedule entry");
       return;
     }
@@ -226,8 +322,20 @@ export default function EventForm({ event, mode }: EventFormProps) {
     for (let i = 0; i < data.schedule.length; i++) {
       const schedule = data.schedule[i];
       if (!schedule.date || !schedule.startTime || !schedule.endTime) {
-        console.error(`Schedule entry ${i} is incomplete:`, schedule);
         alert(`Please complete schedule entry ${i + 1}`);
+        return;
+      }
+    }
+
+    // Validate event details
+    for (let i = 0; i < eventDetails.length; i++) {
+      const detail = eventDetails[i];
+      if (detail.types.length === 0) {
+        alert(`Please add at least one type for event detail ${i + 1}`);
+        return;
+      }
+      if (!detail.imageFile && !detail.imagePreview) {
+        alert(`Please add an image for event detail ${i + 1}`);
         return;
       }
     }
@@ -235,41 +343,39 @@ export default function EventForm({ event, mode }: EventFormProps) {
     const formData = new FormData();
 
     try {
-      // Add all text fields with validation
-      console.log("Adding form fields...");
+      // Add all text fields matching the schema
       if (mode === "edit" && event) {
         formData.append("_id", event._id);
       }
       formData.append("title", data.title);
-      formData.append("description", data.description);
+      // formData.append("description", data.description); // Re-added description to formData
       formData.append("price", data.price.toString());
-      formData.append("type", data.type);
-      formData.append("duration", `${data.durationValue}${data.durationUnit}`);
+      formData.append("type", JSON.stringify(eventTypes));
+      formData.append("duration", `${data.durationValue}${data.durationUnit}`); // Combine value and unit
+      formData.append("date", data.date);
       formData.append("location", data.location);
       formData.append("schedule", JSON.stringify(data.schedule));
 
-      // Add files with validation
-      console.log("Adding files...");
+      // Add thumbnail
       if (thumbnailFile) {
-        console.log("Adding thumbnail file:", thumbnailFile.name);
         formData.append("thumbnail", thumbnailFile);
-      } else {
-        console.log("No thumbnail file to add");
       }
 
-      console.log("Adding image files, count:", imageFiles.length);
-      imageFiles.forEach((file, index) => {
-        console.log(`Adding image file ${index}:`, file.name);
-        formData.append("images", file);
+      // Add event details data (only types, no image references)
+      const eventDetailsData = eventDetails.map((detail) => ({
+        types: detail.types,
+      }));
+      formData.append("eventDetails", JSON.stringify(eventDetailsData));
+
+      // Add event detail images with the same key name "eventDetails"
+      eventDetails.forEach((detail) => {
+        if (detail.imageFile) {
+          formData.append("eventDetails", detail.imageFile);
+        }
       });
 
-      // Debug: Log FormData contents more thoroughly
+      // Debug FormData
       console.log("=== FormData Debug ===");
-      console.log(
-        "FormData entries count:",
-        Array.from(formData.entries()).length
-      );
-
       Array.from(formData.entries()).forEach(([key, value]) => {
         if (value instanceof File) {
           console.log(
@@ -281,20 +387,11 @@ export default function EventForm({ event, mode }: EventFormProps) {
         }
       });
 
-      // Additional check for empty FormData
-      const formDataArray = Array.from(formData.entries());
-      if (formDataArray.length === 0) {
-        console.error("FormData is completely empty!");
-        alert("Form data is empty. Please check your inputs.");
-        return;
-      }
-
       console.log("Submitting to mutation...");
       if (mode === "create") {
         const result = await createEventMutation.mutateAsync(formData);
         console.log("Create mutation result:", result);
       } else if (event) {
-        // Pass formData directly to update mutation
         const result = await updateEventMutation.mutateAsync(formData);
         console.log("Update mutation result:", result);
       }
@@ -304,27 +401,21 @@ export default function EventForm({ event, mode }: EventFormProps) {
     } catch (error) {
       console.error("=== SUBMISSION ERROR ===");
       console.error("Error details:", error);
-      console.error("Error type:", typeof error);
-      console.error("Error constructor:", error?.constructor?.name);
-
-      if (error instanceof Error) {
-        console.error("Error message:", error.message);
-        console.error("Error stack:", error.stack);
-      }
-
-      // Show user-friendly error
       alert(
         `Error submitting form: ${
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
     }
-
     console.log("=== FORM SUBMISSION END ===");
   };
 
   const addSchedule = () => {
-    append({ date: "", startTime: "", endTime: "" });
+    append({
+      date: new Date().toISOString(),
+      startTime: "",
+      endTime: "",
+    });
   };
 
   const isLoading =
@@ -343,17 +434,6 @@ export default function EventForm({ event, mode }: EventFormProps) {
               ? "Fill in the details below to create your event"
               : "Update your event information"}
           </p>
-
-          {/* Debug Button - Remove this in production */}
-          {/* <Button
-            type="button"
-            onClick={debugFormState}
-            variant="outline"
-            size="sm"
-            className="mt-4 bg-yellow-100 border-yellow-300 text-yellow-800"
-          >
-            🐛 Debug Form State
-          </Button> */}
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -366,7 +446,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-2">
                   <Label
                     htmlFor="title"
@@ -387,46 +467,125 @@ export default function EventForm({ event, mode }: EventFormProps) {
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="type"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Event Type *
+                {/* Event Types Section */}
+                <div className="space-y-4">
+                  <Label className="text-sm font-medium text-gray-700">
+                    Event Types *
                   </Label>
-                  <Input
-                    id="type"
-                    {...register("type")}
-                    placeholder="e.g., Workshop, Conference, Meetup"
-                    className="h-11"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      value={currentTypeInput}
+                      onChange={(e) => setCurrentTypeInput(e.target.value)}
+                      placeholder="Add event type (e.g., online, free, workshop)"
+                      className="flex-1"
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addEventType(currentTypeInput);
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addEventType(currentTypeInput)}
+                      disabled={!currentTypeInput.trim()}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {/* Event Types Badges */}
+                  {eventTypes.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {eventTypes.map((type, index) => (
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
+                          {type}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-4 w-4 p-0 hover:bg-transparent"
+                            onClick={() => removeEventType(index)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                   {errors.type && (
                     <p className="text-sm text-red-500">
                       {errors.type.message}
                     </p>
                   )}
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor="description"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Description *
-                </Label>
-                <Textarea
-                  id="description"
-                  {...register("description")}
-                  placeholder="Describe your event in detail..."
-                  rows={4}
-                  className="resize-none"
-                />
-                {errors.description && (
-                  <p className="text-sm text-red-500">
-                    {errors.description.message}
-                  </p>
-                )}
+                {/* Description */}
+                {/* <div className="space-y-2">
+                  <Label
+                    htmlFor="description"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Description *
+                  </Label>
+                  <Textarea
+                    id="description"
+                    {...register("description")}
+                    placeholder="Describe your event in detail..."
+                    rows={4}
+                    className="resize-none"
+                  />
+                  {errors.description && (
+                    <p className="text-sm text-red-500">
+                      {errors.description.message}
+                    </p>
+                  )}
+                </div> */}
+
+                {/* Main Event Date */}
+                {/* <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    Event Date *
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal h-11 bg-transparent"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {watch("date")
+                          ? format(new Date(watch("date")), "MMM dd, yyyy")
+                          : "Select main event date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          watch("date") ? new Date(watch("date")) : undefined
+                        }
+                        onSelect={(date) => {
+                          if (date) {
+                            setValue("date", date.toISOString());
+                          }
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {errors.date && (
+                    <p className="text-sm text-red-500">
+                      {errors.date.message}
+                    </p>
+                  )}
+                </div> */}
               </div>
             </CardContent>
           </Card>
@@ -463,7 +622,6 @@ export default function EventForm({ event, mode }: EventFormProps) {
                     </p>
                   )}
                 </div>
-
                 <div className="space-y-2">
                   <Label
                     htmlFor="location"
@@ -484,7 +642,6 @@ export default function EventForm({ event, mode }: EventFormProps) {
                     </p>
                   )}
                 </div>
-
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700 flex items-center gap-1">
                     <Clock className="w-4 h-4" />
@@ -521,130 +678,242 @@ export default function EventForm({ event, mode }: EventFormProps) {
             </CardContent>
           </Card>
 
-          {/* Media Upload Card */}
+          {/* Add Event Details Card */}
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Plus className="w-5 h-5 text-purple-600" />
+                  Add Event Details
+                </CardTitle>
+                <Button
+                  type="button"
+                  onClick={addEventDetail}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add More
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {eventDetails.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p>
+                    No event details added yet. Click &apos;Add More&apos; to
+                    get started.
+                  </p>
+                </div>
+              ) : (
+                eventDetails.map((detail, index) => (
+                  <Card key={index} className="border border-gray-200">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <h3 className="text-lg font-medium">
+                          Event Detail {index + 1}
+                        </h3>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeEventDetail(index)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Types Section */}
+                        <div className="space-y-4">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Types *
+                          </Label>
+                          <div className="flex gap-2">
+                            <Input
+                              value={detail.currentTypeInput}
+                              onChange={(e) =>
+                                updateEventDetailTypeInput(
+                                  index,
+                                  e.target.value
+                                )
+                              }
+                              placeholder="Add type (e.g., Web Portraits, LinkedIn Profile)"
+                              className="flex-1"
+                              onKeyPress={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  addTypeToEventDetail(
+                                    index,
+                                    detail.currentTypeInput
+                                  );
+                                }
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                addTypeToEventDetail(
+                                  index,
+                                  detail.currentTypeInput
+                                )
+                              }
+                              disabled={!detail.currentTypeInput.trim()}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
+
+                          {/* Types Badges */}
+                          {detail.types.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {detail.types.map((type, typeIndex) => (
+                                <Badge
+                                  key={typeIndex}
+                                  variant="secondary"
+                                  className="flex items-center gap-1"
+                                >
+                                  {type}
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-4 w-4 p-0 hover:bg-transparent"
+                                    onClick={() =>
+                                      removeTypeFromEventDetail(
+                                        index,
+                                        typeIndex
+                                      )
+                                    }
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </Button>
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Image Section */}
+                        <div className="space-y-4">
+                          <Label className="text-sm font-medium text-gray-700">
+                            Image *
+                          </Label>
+                          {!detail.imagePreview ? (
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                              <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                              <div className="space-y-2">
+                                <Label
+                                  htmlFor={`eventDetailImage-${index}`}
+                                  className="cursor-pointer"
+                                >
+                                  <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                                    Click to upload image
+                                  </span>
+                                  <Input
+                                    id={`eventDetailImage-${index}`}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                      handleEventDetailImageChange(index, e)
+                                    }
+                                    className="hidden"
+                                  />
+                                </Label>
+                                <p className="text-xs text-gray-500">
+                                  PNG, JPG, WEBP up to 5MB
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="relative">
+                              <Image
+                                width={300}
+                                height={200}
+                                src={detail.imagePreview || "/placeholder.svg"}
+                                alt={`Event detail ${index + 1}`}
+                                className="w-full h-48 object-cover rounded-lg border"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2"
+                                onClick={() => removeEventDetailImage(index)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Thumbnail Upload Card */}
           <Card className="shadow-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl">
                 <ImageIcon className="w-5 h-5 text-purple-600" />
-                Event Media
+                Event Thumbnail
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-8">
-              {/* Thumbnail Upload */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-gray-700">
-                    Event Thumbnail
-                  </Label>
-                  <Badge variant="secondary" className="text-xs">
-                    Recommended: 16:9 ratio
-                  </Badge>
-                </div>
-
-                {!thumbnailPreview ? (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
-                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <div className="space-y-2">
-                      <Label htmlFor="thumbnail" className="cursor-pointer">
-                        <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                          Click to upload thumbnail
-                        </span>
-                        <Input
-                          id="thumbnail"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleThumbnailChange}
-                          className="hidden"
-                        />
-                      </Label>
-                      <p className="text-xs text-gray-500">
-                        PNG, JPG, WEBP up to 5MB
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <Image
-                      width={400}
-                      height={200}
-                      src={thumbnailPreview || "/placeholder.svg"}
-                      alt="Thumbnail preview"
-                      className="w-full h-48 object-cover rounded-lg border"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={removeThumbnail}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                )}
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-gray-700">
+                  Event Thumbnail *
+                </Label>
+                <Badge variant="secondary" className="text-xs">
+                  Recommended: 16:9 ratio
+                </Badge>
               </div>
-
-              <Separator />
-
-              {/* Additional Images */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-gray-700">
-                    Additional Images
-                  </Label>
-                  <Badge variant="secondary" className="text-xs">
-                    {imagesPreviews.length} image
-                    {imagesPreviews.length !== 1 ? "s" : ""}
-                  </Badge>
-                </div>
-
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                  <ImageIcon className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+              {!thumbnailPreview ? (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <div className="space-y-2">
-                    <Label htmlFor="images" className="cursor-pointer">
+                    <Label htmlFor="thumbnail" className="cursor-pointer">
                       <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                        Add more images
+                        Click to upload thumbnail
                       </span>
                       <Input
-                        id="images"
+                        id="thumbnail"
                         type="file"
                         accept="image/*"
-                        multiple
-                        onChange={handleImagesChange}
+                        onChange={handleThumbnailChange}
                         className="hidden"
                       />
                     </Label>
                     <p className="text-xs text-gray-500">
-                      Select multiple images, max 5MB each
+                      PNG, JPG, WEBP up to 5MB
                     </p>
                   </div>
                 </div>
-
-                {imagesPreviews.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {imagesPreviews.map((preview, index) => (
-                      <div key={index} className="relative group">
-                        <Image
-                          width={200}
-                          height={200}
-                          src={preview || "/placeholder.svg"}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg border"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => removeImage(index)}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              ) : (
+                <div className="relative">
+                  <Image
+                    width={400}
+                    height={200}
+                    src={thumbnailPreview || "/placeholder.svg"}
+                    alt="Thumbnail preview"
+                    className="w-full h-48 object-cover rounded-lg border"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                    onClick={removeThumbnail}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -659,7 +928,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-600">
-                  Add one or more dates for your event
+                  Add one or more schedule entries for your event
                 </p>
                 <Button
                   type="button"
@@ -668,10 +937,9 @@ export default function EventForm({ event, mode }: EventFormProps) {
                   size="sm"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Date
+                  Add Schedule
                 </Button>
               </div>
-
               <div className="space-y-4">
                 {fields.map((field, index) => (
                   <Card key={field.id} className="border border-gray-200">
@@ -697,23 +965,6 @@ export default function EventForm({ event, mode }: EventFormProps) {
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
-                              {/* <CalendarComponent
-                                mode="single"
-                                selected={
-                                  watch(`schedule.${index}.date`)
-                                    ? new Date(watch(`schedule.${index}.date`))
-                                    : undefined
-                                }
-                                onSelect={(date) => {
-                                  if (date) {
-                                    setValue(
-                                      `schedule.${index}.date`,
-                                      format(date, "yyyy-MM-dd")
-                                    );
-                                  }
-                                }}
-                                initialFocus
-                              /> */}
                               <Calendar
                                 mode="single"
                                 selected={
@@ -725,7 +976,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
                                   if (date) {
                                     setValue(
                                       `schedule.${index}.date`,
-                                      format(date, "yyyy-MM-dd")
+                                      date.toISOString()
                                     );
                                   }
                                 }}
@@ -739,7 +990,6 @@ export default function EventForm({ event, mode }: EventFormProps) {
                             </p>
                           )}
                         </div>
-
                         <div className="space-y-2">
                           <Label className="text-sm font-medium text-gray-700">
                             Start Time
@@ -755,7 +1005,6 @@ export default function EventForm({ event, mode }: EventFormProps) {
                             </p>
                           )}
                         </div>
-
                         <div className="space-y-2">
                           <Label className="text-sm font-medium text-gray-700">
                             End Time
@@ -771,7 +1020,6 @@ export default function EventForm({ event, mode }: EventFormProps) {
                             </p>
                           )}
                         </div>
-
                         <div className="flex justify-end">
                           {fields.length > 1 && (
                             <Button
@@ -790,7 +1038,6 @@ export default function EventForm({ event, mode }: EventFormProps) {
                   </Card>
                 ))}
               </div>
-
               {errors.schedule && (
                 <p className="text-sm text-red-500">
                   {errors.schedule.message}

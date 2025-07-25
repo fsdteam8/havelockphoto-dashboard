@@ -3,18 +3,26 @@ export interface EventSchedule {
   startTime: string;
   endTime: string;
 }
-
+export interface EventDetail {
+  types: string[];
+  image: string;
+}
 export interface Event {
   _id: string;
   title: string;
-  description: string;
+  // description?: string;
   price: number;
-  type: string;
+  type: string[];
   duration: string;
+  schedule: {
+    date: string;
+    startTime: string;
+    endTime: string;
+  }[];
   location: string;
-  schedule: EventSchedule[];
   thumbnail: string;
-  images: string[];
+  images?: string[];
+  eventDetails: EventDetail[];
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -45,4 +53,18 @@ export interface EventsResponse {
 export interface DurationUnit {
   value: "h" | "m";
   label: string;
+}
+
+// Add API response types
+export interface EventsApiResponse {
+  status: boolean;
+  message: string;
+  events: Event[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalData: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
 }

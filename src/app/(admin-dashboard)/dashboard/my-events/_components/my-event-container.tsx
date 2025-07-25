@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
@@ -7,9 +8,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useEvents, useDeleteEvent } from "@/hooks/use-events";
-import type { Event } from "@/components/types/event";
+import type { Event, EventsApiResponse } from "@/components/types/event";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+// import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,14 +28,24 @@ const MyEventsContainer = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
 
-  const { data: events, isLoading, error } = useEvents();
+  // Updated to handle the new API response structure
+  const {
+    data: apiResponse,
+    isLoading,
+    error,
+  } = useEvents() as {
+    data: EventsApiResponse | undefined;
+    isLoading: boolean;
+    error: any;
+  };
+
   const deleteEventMutation = useDeleteEvent();
 
-  const itemsPerPage = 7;
-  const totalPages = Math.ceil((events?.length || 0) / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentEvents = events?.slice(startIndex, endIndex) || [];
+  console.log(apiResponse, "API Response in MyEventsContainer");
+
+  // Extract events and pagination from API response
+  const events = apiResponse?.events || [];
+  const pagination = apiResponse?.pagination;
 
   const handleDeleteEvent = async (eventId: string) => {
     try {
@@ -51,6 +63,28 @@ const MyEventsContainer = () => {
       return format(date, "MM/dd/yyyy") + ` ${firstSchedule.startTime}`;
     }
     return format(new Date(event.createdAt), "MM/dd/yyyy hh:mm a");
+  };
+
+  // Format event types - handle array of types
+  const formatEventTypes = (types: string[]) => {
+    if (!types || types.length === 0) return "N/A";
+
+    if (types.length === 1) {
+      return types[0];
+    }
+
+    if (types.length <= 3) {
+      return types.join(", ");
+    }
+
+    return `${types.slice(0, 2).join(", ")} +${types.length - 2} more`;
+  };
+
+  // Handle page changes - this would typically trigger a new API call
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // In a real implementation, you'd refetch data with the new page
+    // refetch({ page })
   };
 
   if (isLoading) {
@@ -93,9 +127,9 @@ const MyEventsContainer = () => {
               <th className="w-[100px] text-base font-bold text-[#131313] leading-[120%] font-manrope text-left py-[15px]">
                 Price
               </th>
-              <th className="w-[150px] text-base font-bold text-[#131313] leading-[120%] font-manrope text-left py-[15px]">
+              {/* <th className="w-[150px] text-base font-bold text-[#131313] leading-[120%] font-manrope text-left py-[15px]">
                 Type
-              </th>
+              </th> */}
               <th className="w-[150px] text-base font-bold text-[#131313] leading-[120%] font-manrope text-left py-[15px]">
                 Date
               </th>
@@ -105,11 +139,11 @@ const MyEventsContainer = () => {
             </tr>
           </thead>
           <tbody>
-            {currentEvents.map((event, index) => (
+            {events.map((event, index) => (
               <tr
                 key={event._id}
                 className={`${
-                  index === currentEvents.length - 1 ? "border-b" : "border-b-0"
+                  index === events.length - 1 ? "border-b" : "border-b-0"
                 } border-t border-x border-[#B6B6B6] flex items-center justify-between gap-[135px]`}
               >
                 <td className="w-[400px] flex items-center gap-[10px] pl-[50px] py-[10px]">
@@ -117,7 +151,8 @@ const MyEventsContainer = () => {
                     <Image
                       src={
                         event.thumbnail ||
-                        "/placeholder.svg?height=60&width=100&query=event"
+                        "/placeholder.svg?height=60&width=100&query=event" ||
+                        "/placeholder.svg"
                       }
                       alt={event.title}
                       width={100}
@@ -132,9 +167,43 @@ const MyEventsContainer = () => {
                 <td className="w-[100px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
                   ${event.price.toFixed(2)}
                 </td>
-                <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
-                  {event.type}
-                </td>
+                {/* <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
+                  <div className="flex flex-wrap gap-1">
+                    {event.type && event.type.length > 0 ? (
+                      event.type.length <= 2 ? (
+                        event.type.map((type, typeIndex) => (
+                          <Badge
+                            key={typeIndex}
+                            variant="secondary"
+                            className="text-xs px-2 py-1"
+                          >
+                            {type}
+                          </Badge>
+                        ))
+                      ) : (
+                        <>
+                          {event.type.slice(0, 1).map((type, typeIndex) => (
+                            <Badge
+                              key={typeIndex}
+                              variant="secondary"
+                              className="text-xs px-2 py-1"
+                            >
+                              {type}
+                            </Badge>
+                          ))}
+                          <Badge
+                            variant="outline"
+                            className="text-xs px-2 py-1"
+                          >
+                            +{event.type.length - 1}
+                          </Badge>
+                        </>
+                      )
+                    ) : (
+                      <span className="text-gray-400 text-sm">No type</span>
+                    )}
+                  </div>
+                </td> */}
                 <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
                   {formatEventDate(event)}
                 </td>
@@ -145,7 +214,6 @@ const MyEventsContainer = () => {
                         <SquarePen className="w-5 h-5" />
                       </button>
                     </Link>
-
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button className="-mt-2">
@@ -157,12 +225,14 @@ const MyEventsContainer = () => {
                           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                           <AlertDialogDescription>
                             This action cannot be undone. This will permanently
-                            delete the event &apos;{event.title}&apos;.
+                            delete the event &apos;{event.title}
+                            &apos;.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
+                            className="text-white bg-red-600 hover:bg-red-700 focus:ring-red-500"
                             onClick={() => handleDeleteEvent(event._id)}
                             disabled={deleteEventMutation.isPending}
                           >
@@ -187,14 +257,18 @@ const MyEventsContainer = () => {
       </div>
       <div className="bg-white flex items-center justify-between py-[10px] px-[50px]">
         <p className="text-sm font-medium leading-[120%] font-manrope text-[#707070]">
-          Showing {startIndex + 1} to {Math.min(endIndex, events.length)} of{" "}
-          {events.length} results
+          Showing {((pagination?.currentPage || 1) - 1) * events.length + 1} to{" "}
+          {Math.min(
+            (pagination?.currentPage || 1) * events.length,
+            pagination?.totalData || events.length
+          )}{" "}
+          of {pagination?.totalData || events.length} results
         </p>
         <div>
           <HavelockPhotoPagination
-            totalPages={totalPages}
-            currentPage={currentPage}
-            onPageChange={(page) => setCurrentPage(page)}
+            totalPages={pagination?.totalPages || 1}
+            currentPage={pagination?.currentPage || 1}
+            onPageChange={handlePageChange}
           />
         </div>
       </div>
