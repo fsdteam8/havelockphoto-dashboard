@@ -18,7 +18,9 @@ const RevenueContainer = () => {
 
   console.log(data?.message?.bookings);
 
-  if (isLoading) return <div className="w-full bg-gray-50 mt-10">
+  if (isLoading)
+    return (
+      <div className="w-full bg-gray-50 mt-10">
         <div className="bg-white rounded-lg shadow-sm border">
           {/* Header */}
           <div className="flex items-center justify-between gap-10 p-4 border-b bg-gray-50 font-medium text-sm">
@@ -46,6 +48,7 @@ const RevenueContainer = () => {
           ))}
         </div>
       </div>
+    );
   if (isError) return <div>Error: {error?.message}</div>;
 
   return (
@@ -75,7 +78,7 @@ const RevenueContainer = () => {
                   {item.season}
                 </td> */}
                 <td className="text-base font-medium text-[#424242] leading-[120%] font-manrope text-center pr-[50px] py-[30px]">
-                  {item.totalAmount}
+                  € {item.totalAmount}
                 </td>
               </tr>
             ))}

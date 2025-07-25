@@ -1,6 +1,5 @@
 import {
   CalendarPlus2,
-  FileVideo,
   LayoutDashboard,
   NotebookTabs,
   Settings,
@@ -35,20 +34,20 @@ export const DashboardSidebarItems: DashboardSidebarItemsDataType[] = [
     href: "/dashboard/booking",
     icon: <NotebookTabs />,
   },
+  // {
+  //   id: 4,
+  //   name: "Videos",
+  //   href: "/dashboard/videos",
+  //   icon: <FileVideo />,
+  // },
   {
     id: 4,
-    name: "Videos",
-    href: "/dashboard/videos",
-    icon: <FileVideo />,
-  },
-  {
-    id: 5,
     name: "Revenue",
     href: "/dashboard/revenue",
     icon: <ShieldCheck />,
   },
   {
-    id: 6,
+    id: 5,
     name: "Setting",
     href: "/dashboard/setting",
     icon: <Settings />,
