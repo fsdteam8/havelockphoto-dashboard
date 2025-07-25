@@ -20,9 +20,8 @@ const DashOverview = ({ data }: { data?: BookingSummaryMessage }) => {
               Own Revenue
             </h3>
             <p className="text-lg font-medium leading-[120%] text-[#424242] font-manrope pt-2 flex items-center gap-1">
-              <GoDotFill className="w-4 h-4 text-[#525773]" />
-
-              {data?.totalRevenue ? `£${data.totalRevenue}` : "£0.00"}
+              <span className="w-4 h-4 text-[#17ad23]">€</span>
+              {data?.totalRevenue ? `${data.totalRevenue}` : "0.00"}
             </p>
           </div>
           <div>

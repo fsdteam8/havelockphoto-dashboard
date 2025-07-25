@@ -38,7 +38,12 @@ const DashboardContainer = () => {
         </div>
       </div>
     );
-  if (isError) return <div className="p-10 rounded-lg bg-white text-black">Error: {error?.message}</div>;
+  if (isError)
+    return (
+      <div className="p-10 rounded-lg bg-white text-black">
+        Error: {error?.message}
+      </div>
+    );
   return (
     <div>
       <DashOverview data={data?.message} />
