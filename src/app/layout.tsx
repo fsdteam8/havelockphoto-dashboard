@@ -12,8 +12,9 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "PRO VIZ",
-  description: "Event Photography Dashboard. Manage your events, bookings, and more with ease.",
+  title: "PRO VIZ | Event Photography Dashboard",
+  description:
+    "Event Photography Dashboard. Manage your events, bookings, and more with ease.",
 };
 
 export default function RootLayout({
@@ -24,7 +25,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${manrope.variable} antialiased`}>
-        <AppProvider>{children}<Toaster /></AppProvider>
+        <AppProvider>
+          {children}
+          <Toaster />
+        </AppProvider>
       </body>
     </html>
   );

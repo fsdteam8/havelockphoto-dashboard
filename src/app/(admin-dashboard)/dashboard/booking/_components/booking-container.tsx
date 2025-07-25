@@ -4,7 +4,6 @@ import HavelockPhotoPagination from "@/components/ui/havelockphoto-pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
-import Image from "next/image";
 import React, { useState } from "react";
 
 const BookingContainer = () => {
@@ -84,7 +83,7 @@ const BookingContainer = () => {
                 Price
               </th>
               <th className="w-[130px] text-base font-bold text-[#131313] leading-[120%] font-manrope text-left py-[15px]">
-                Address
+                Email
               </th>
               <th className="w-[150px] text-base font-bold text-[#131313] leading-[120%] font-manrope text-left py-[15px]">
                 Date
@@ -101,24 +100,15 @@ const BookingContainer = () => {
                 className={`border-t border-x border-[#B6B6B6] flex items-center justify-between gap-[155px]`}
               >
                 <td className="w-[300px] flex items-center gap-[10px] pl-[50px] py-[20px]">
-                  <div className="max-w-[100px]">
-                    <Image
-                      src={item?.eventId?.images[0]}
-                      alt={item?.eventId?.title}
-                      width={100}
-                      height={60}
-                      className="w-[100px] h-[60px] rounded-[8px] object-cover"
-                    />
-                  </div>
                   <h4 className="w-[190px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
-                    {item?.eventId?.title}
+                    {item?.name}
                   </h4>
                 </td>
                 <td className="w-[100px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
-                  {item?.eventId?.price}
+                  € {item?.totalAmount}
                 </td>
                 <td className="w-[130px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
-                  {item?.eventId?.location}
+                  {item?.email}
                 </td>
                 <td className="w-[140px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
                   {moment(item.createdAt).format("MM/DD/YYYY hh:mma")}
