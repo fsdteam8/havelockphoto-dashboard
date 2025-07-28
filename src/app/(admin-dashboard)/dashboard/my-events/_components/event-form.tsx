@@ -24,7 +24,7 @@ import {
   ImageIcon,
   Clock,
   MapPin,
-  DollarSign,
+ 
   FileText,
   X,
 } from "lucide-react";
