@@ -7,7 +7,7 @@ const MyEventsHeader = () => {
     <div className="w-full flex items-center justify-between">
       <div>
         <h1 className="text-2xl font-bold text-[#131313] leading-[120%] font-manrope">
-          My Events
+          My Events 
         </h1>
         <div className="flex items-center gap-2 pt-[14px]">
           <Link href={"/dashboard"}>
@@ -32,7 +32,7 @@ const MyEventsHeader = () => {
         </Link>
       </div>
     </div>
-  );
+  ); 
 };
 
 export default MyEventsHeader;
