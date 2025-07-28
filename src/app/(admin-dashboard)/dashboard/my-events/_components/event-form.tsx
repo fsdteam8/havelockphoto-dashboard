@@ -594,7 +594,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
           <Card className="shadow-sm">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2 text-xl">
-                <DollarSign className="w-5 h-5 text-green-600" />
+                {/* <DollarSign className="w-5 h-5 text-green-600" /> */}
                 Event Details
               </CardTitle>
             </CardHeader>
@@ -605,15 +605,15 @@ export default function EventForm({ event, mode }: EventFormProps) {
                     htmlFor="price"
                     className="text-sm font-medium text-gray-700 flex items-center gap-1"
                   >
-                    <DollarSign className="w-4 h-4" />
-                    Price *
+                    {/* <DollarSign className="w-4 h-4" /> */}
+                   £ Price *
                   </Label>
                   <Input
                     id="price"
                     type="number"
                     step="0.01"
                     {...register("price", { valueAsNumber: true })}
-                    placeholder="0.00"
+                    placeholder="   0.00 "
                     className="h-11"
                   />
                   {errors.price && (
