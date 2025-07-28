@@ -78,7 +78,7 @@ const RevenueContainer = () => {
                   {item.season}
                 </td> */}
                 <td className="text-base font-medium text-[#424242] leading-[120%] font-manrope text-center pr-[50px] py-[30px]">
-                  € {item.totalAmount}
+                    £ {item.totalAmount}
                 </td>
               </tr>
             ))}

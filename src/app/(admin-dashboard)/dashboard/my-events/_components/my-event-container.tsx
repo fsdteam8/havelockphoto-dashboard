@@ -165,7 +165,7 @@ const MyEventsContainer = () => {
                   </h4>
                 </td>
                 <td className="w-[100px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
-                  ${event.price.toFixed(2)}
+                  £ {event.price.toFixed(2)}
                 </td>
                 {/* <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[10px]">
                   <div className="flex flex-wrap gap-1">

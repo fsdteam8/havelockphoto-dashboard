@@ -105,7 +105,7 @@ const BookingContainer = () => {
                   </h4>
                 </td>
                 <td className="w-[100px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
-                  € {item?.totalAmount}
+                  £ {item?.totalAmount}
                 </td>
                 <td className="w-[130px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
                   {item?.email}
