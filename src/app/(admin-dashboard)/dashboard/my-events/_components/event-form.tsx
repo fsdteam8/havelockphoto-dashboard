@@ -869,8 +869,8 @@ export default function EventForm({ event, mode }: EventFormProps) {
                 <Label className="text-sm font-medium text-gray-700">
                   Event Thumbnail *
                 </Label>
-                <Badge variant="secondary" className="text-xs text-white">
-                  Recommended: 16:9 ratio
+                <Badge variant="secondary" className="text-xs bg-blue-600 hover:bg-blue-700 text-white">
+                  Recommended: 16*9 px ratio
                 </Badge>
               </div>
               {!thumbnailPreview ? (
