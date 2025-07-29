@@ -503,7 +503,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
                         <Badge
                           key={index}
                           variant="secondary"
-                          className="flex items-center gap-1 text-white"
+                          className="flex items-center gap-1 text-white  bg-blue-600 hover:bg-blue-700"
                         >
                           {type}
                           <Button
@@ -773,7 +773,7 @@ export default function EventForm({ event, mode }: EventFormProps) {
                                 <Badge
                                   key={typeIndex}
                                   variant="secondary"
-                                  className="flex items-center gap-1"
+                                  className="flex items-center gap-1 text-white bg-blue-600 hover:bg-blue-700"
                                 >
                                   {type}
                                   <Button
