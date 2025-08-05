@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react"
 import moment from "moment"
 import { useState } from "react"
 import { toast } from "sonner"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface CancelBookingResponse {
   success: boolean
@@ -168,9 +169,26 @@ const BookingContainer = () => {
                 <td className="w-[100px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
                   £{item?.totalAmount}
                 </td>
-                <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px] truncate">
+
+                {/* <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px] truncate">
                   {item?.email}
-                </td>
+                </td> */}
+
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <td className="w-[150px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px] truncate cursor-help">
+            {item?.email}
+          </td>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-white">{item?.email}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+
+
+
                 <td className="w-[130px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
                   {moment(item.createdAt).format("MM/DD/YYYY hh:mma")}
                 </td>
