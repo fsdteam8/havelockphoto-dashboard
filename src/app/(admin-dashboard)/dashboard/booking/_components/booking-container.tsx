@@ -113,14 +113,29 @@ const BookingContainer = () => {
                 <td className="w-[140px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-left py-[20px]">
                   {moment(item.createdAt).format("MM/DD/YYYY hh:mma")}
                 </td>
-                <td className="w-[170px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-center pr-[50px] py-[20px] flex flex-col gap-2">
+                {/* <td className="w-[170px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-center pr-[50px] py-[20px] flex flex-col gap-2">
                   <button className="py-[5px] px-[15px] bg-[#008000] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope">
                     {item?.paymentStatus}
                   </button>
-                  {/* <button className="py-[5px] px-[12px] bg-[#CBA0E3] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope">
-                    Scheduling
-                  </button> */}
-                </td>
+                 
+                </td> */}
+
+
+                <td className="w-[170px] text-base font-medium text-[#424242] leading-[120%] font-manrope text-center pr-[50px] py-[20px] flex flex-col gap-2">
+  <button
+    className={`py-[5px] px-[15px] rounded-[32px] text-sm font-semibold leading-[120%] text-[#F4F4F4] font-manrope
+      ${
+        item?.paymentStatus === "cancelled"
+          ? "bg-red-600" // red
+          : item?.paymentStatus === "paid"
+          ? "bg-[#008000]" // green
+          : "bg-[#CBA0E3]" // default fallback (optional)
+      }
+    `}
+  >
+    {item?.paymentStatus}
+  </button>
+</td>
               </tr>
             ))}
           </tbody>
