@@ -840,11 +840,11 @@ export default function EventForm({ event, mode }: EventFormProps) {
               variant="outline"
               onClick={() => router.back()}
               disabled={isLoading}
-              className="h-12 px-8"
+              className="h-12 px-8 font-bold"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading} className="h-12 px-8 bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" disabled={isLoading} className="h-12 px-8 text-white font-bold bg-blue-600 hover:bg-blue-700">
               {isLoading ? "Saving..." : mode === "create" ? "Create Event" : "Update Event"}
             </Button>
           </div>
