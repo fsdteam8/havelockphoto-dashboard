@@ -22,13 +22,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div>
+    <div className="  ">
       <DashboardHeader />
       <div className="w-full flex">
         <div>
           <DashboardSidebar />
         </div>
-        <main className="w-full px-[50px] pt-4">{children}</main>
+        <main className="w-full px-[50px] pt-4 overflow-x-auto">{children}</main>
       </div>
     </div>
   );
