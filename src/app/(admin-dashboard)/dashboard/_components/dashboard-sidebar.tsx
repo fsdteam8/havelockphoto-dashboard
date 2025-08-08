@@ -20,7 +20,7 @@ const DashboardSidebar = () => {
   };
 
   return (
-    <aside className="w-[350px] h-screen sticky top-0 z-50 bg-[#FAFAFA] border-r border-[#D9D9D9] py-6 px-4 -mt-[100px] overflow-hidden">
+    <aside className="w-[350px] h-screen sticky top-0 z-50 bg-[#FAFAFA] border-r border-[#D9D9D9] py-6 px-4  overflow-hidden">
       <div className="h-full flex flex-col items-center relative">
         {/* Logo */}
         <Image

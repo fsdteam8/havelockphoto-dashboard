@@ -130,7 +130,7 @@ const MyEventsContainer = () => {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">No events found.</p>
-        <Link href="/dashboard/my-events/create-event">
+        <Link href="/dashboard/my-events/add-event">
           <Button className="mt-4">Create Your First Event</Button>
         </Link>
       </div>
